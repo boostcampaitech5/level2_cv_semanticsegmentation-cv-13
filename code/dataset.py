@@ -70,7 +70,7 @@ class XRayDataset(Dataset):
         labelnames = []
         for i, (x, y) in enumerate(gkf.split(_filenames, ys, groups)): # 
             if is_train:
-                # 0번을 validation dataset으로 사용합니다.
+                # fold_num번을 validation dataset으로 사용합니다.
                 if i == fold_num:
                     continue
                     

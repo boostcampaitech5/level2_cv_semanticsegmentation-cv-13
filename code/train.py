@@ -179,8 +179,8 @@ def train(IMAGE_ROOT, LABEL_ROOT, SAVED_MODEL, args):
             model = model.cuda()
             
             # inference
-            # outputs = model(images)['out'] 
-            outputs = model(images)
+            outputs = model(images)['out'] 
+            # outputs = model(images)
             
             # loss 계산
             loss = criterion(outputs, masks)
