@@ -78,3 +78,7 @@ def f1loss(classes=3, epsilon=1e-7):
 def focalloss(gamma=2,alpha=0.25,device='cpu'):
     criterion = FocalLoss(gamma=gamma, alpha=alpha, device=device)
     return criterion
+
+def bce_with_logit_loss():
+    criterion = nn.BCEWithLogitsLoss()
+    return criterion

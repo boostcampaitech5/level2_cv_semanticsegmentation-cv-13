@@ -9,9 +9,9 @@ import logging
 import json
 
 from train import fit
-from test import test
+# from test import test
 from datasets import create_dataloader
-from datasets.dataset import CustomDataset, TestDataset
+from datasets.dataset import CustomDataset, TestDataset, XRayDataset
 from log import setup_default_logging
 
 from accelerate import Accelerator
@@ -55,14 +55,16 @@ def run(args):
     _logger.info('# of params: {}'.format(np.sum([p.numel() for p in model.parameters()])))
 
     # load dataset
-    trainset = CustomDataset(args=args, train=True)
-    valset = CustomDataset(args=args, train=False)
-    testset = TestDataset(args=args)
+    print("Loading dataset...")
+    trainset = XRayDataset(args=args, is_train=True)
+    valset = XRayDataset(args=args, is_train=False)
+    # testset = TestDataset(args=args)
     
     # load dataloader
-    trainloader = create_dataloader(dataset=trainset, batch_size=args.batch_size, shuffle=True)
-    valloader = create_dataloader(dataset=valset, batch_size=args.batch_size, shuffle=False)
-    testloader = create_dataloader(dataset=testset, batch_size=1, shuffle=False)
+    print("Loading dataloader...")
+    trainloader = create_dataloader(dataset=trainset, batch_size=args.batch_size, shuffle=True,num_workers=8)
+    valloader = create_dataloader(dataset=valset, batch_size=args.batch_size, shuffle=False,num_workers=0)
+    # testloader = create_dataloader(dataset=testset, batch_size=1, shuffle=False)
 
     # set criterion
     criterion = __import__('losses.loss', fromlist='loss').__dict__[args.loss](**args.loss_param)
@@ -80,6 +82,9 @@ def run(args):
     model, optimizer, trainloader, valloader, lr_scheduler = accelerator.prepare(
         model, optimizer, trainloader, valloader, lr_scheduler
     )
+    # model, optimizer, trainloader, lr_scheduler = accelerator.prepare(
+    #     model, optimizer, trainloader, lr_scheduler
+    # )
 
     # initialize wandb
     if args.use_wandb:
@@ -87,7 +92,8 @@ def run(args):
                    project  = args.project_name, 
                    entity   = args.entity,
                    config   = args)
-
+        
+    print("Start training...")
     # fitting model
     fit(model        = model, 
         trainloader  = trainloader, 
@@ -100,11 +106,11 @@ def run(args):
         args         = args)
 
     # testing model
-    test(model        = model,
-         testloader   = testloader,
-         accelerator  = accelerator,
-         savedir      = savedir,
-         args         = args)
+    # test(model        = model,
+    #     #  testloader   = testloader,
+    #      accelerator  = accelerator,
+    #      savedir      = savedir,
+    #      args         = args)
 
 
 if __name__=='__main__':

@@ -1,0 +1,85 @@
+{
+    "os": "Linux-4.4.0-210-generic-x86_64-with-glibc2.27",
+    "python": "3.10.11",
+    "heartbeatAt": "2023-06-07T14:17:37.515119",
+    "startedAt": "2023-06-07T14:17:36.898794",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "/opt/ml/level1_segmentation-cv-13/main.py",
+    "codePath": "main.py",
+    "git": {
+        "remote": "https://github.com/boostcampaitech5/level2_cv_semanticsegmentation-cv-13",
+        "commit": "bdd767aac9889f12b90a2434713a58c1b0700377"
+    },
+    "email": "jh58power@naver.com",
+    "root": "/opt/ml/level1_segmentation-cv-13",
+    "host": "58e63fd8d65b",
+    "username": "root",
+    "executable": "/opt/conda/envs/segmentation/bin/python",
+    "cpu_count": 8,
+    "cpu_count_logical": 8,
+    "cpu_freq": {
+        "current": 2200.044,
+        "min": 0.0,
+        "max": 0.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 2200.044,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2200.044,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2200.044,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2200.044,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2200.044,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2200.044,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2200.044,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2200.044,
+            "min": 0.0,
+            "max": 0.0
+        }
+    ],
+    "disk": {
+        "total": 98.30496215820312,
+        "used": 23.257389068603516
+    },
+    "gpu": "Tesla V100-PCIE-32GB",
+    "gpu_count": 1,
+    "gpu_devices": [
+        {
+            "name": "Tesla V100-PCIE-32GB",
+            "memory_total": 34089730048
+        }
+    ],
+    "memory": {
+        "total": 88.50577545166016
+    }
+}

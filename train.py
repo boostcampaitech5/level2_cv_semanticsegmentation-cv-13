@@ -5,8 +5,10 @@ import os
 import json
 import torch
 from collections import OrderedDict
+import torch.nn.functional as F
 import numpy as np
-from utils.util import plot_confusion_matrix,toConfusionMatrix, calculateScore
+from utils.util import plot_confusion_matrix,toConfusionMatrix, calculateScore,dice_coef
+import tqdm
 
 _logger = logging.getLogger('train')
 
@@ -51,110 +53,117 @@ class cmMetter:
             self.label = np.concatenate((self.label, label.cpu().detach().numpy()))
 
 
-def outputToPred(outputs):
-    #output -> 단일 클래스 pred로 변환
-    return outputs.argmax(dim=1)
-
-
 def train(model,accelerator, dataloader, criterion, optimizer,log_interval, args) -> dict:   
-    batch_time_m = AverageMeter()
-    data_time_m = AverageMeter()
-    acc_m = AverageMeter()
     losses_m = AverageMeter()
-    cm_m = cmMetter()
-    end = time.time()
+    interval_time = 0
+    
+    dices = []
+    dice_per_batch = 0
+    thr = 0.5
     
     model.train()
     optimizer.zero_grad()
-    for idx, (inputs, targets) in enumerate(dataloader):
+   
+    for idx, (images, masks) in enumerate(dataloader):
         with accelerator.accumulate(model):
-            data_time_m.update(time.time() - end)
-            
-            inputs, targets = inputs, targets
+            tic = time.time()
+            images, masks = images, masks
 
             # predict
-            outputs = model(inputs)
+            outputs = model(images)['out']
+            
             # get loss & loss backward
-            loss = criterion(outputs, targets)    
+            loss = criterion(outputs, masks)
             accelerator.backward(loss)
+            
             # loss update
             optimizer.step()
             optimizer.zero_grad()
             losses_m.update(loss.item())
-
-            # accuracy
-            preds = outputToPred(outputs)
-            cm_m.update(preds, targets)
-            acc_m.update(targets.eq(preds).sum().item()/targets.size(0), n=targets.size(0))
             
-            batch_time_m.update(time.time() - end)
-        
+            # accuracy
+            outputs = torch.sigmoid(outputs)
+            outputs = (outputs > thr).detach().cpu()
+            masks = masks.detach().cpu()
+            
+            dice = dice_coef(outputs, masks)
+            dice_per_batch = torch.mean(dice, dim=0)
+            
+            toc = time.time()
+            interval_time += toc - tic
             if idx % log_interval == 0 and idx != 0: 
                 _logger.info('TRAIN [{:>4d}/{}] Loss: {loss.val:>6.4f} ({loss.avg:>6.4f}) '
-                            'Acc: {acc.avg:.3%} '
+                            'Dice: {dice:.3f} '
                             'LR: {lr:.3e} '
-                            'Time: {batch_time.val:.3f}s, {rate:>7.2f}/s ({batch_time.avg:.3f}s, {rate_avg:>7.2f}/s) '
-                            'Data: {data_time.val:.3f} ({data_time.avg:.3f})'.format(idx+1, len(dataloader), 
+                            'Time: {batch_time:.3f}s'.format(idx+1, len(dataloader), 
                                                                                     loss       = losses_m, 
-                                                                                    acc        = acc_m, 
+                                                                                    dice       = torch.mean(dice_per_batch).item(), 
                                                                                     lr         = optimizer.param_groups[0]['lr'],
-                                                                                    batch_time = batch_time_m,
-                                                                                    rate       = inputs.size(0) / batch_time_m.val,
-                                                                                    rate_avg   = inputs.size(0) / batch_time_m.avg,
-                                                                                    data_time  = data_time_m))
+                                                                                    batch_time = interval_time))
+                interval_time = 0
     
-            end = time.time()
-
-    confusionmatrix = toConfusionMatrix(cm_m.pred, cm_m.label, args.num_classes)
-    F1_score = calculateScore(cm_m.pred, cm_m.label, args.num_classes)
-
-    return OrderedDict([('acc',acc_m.avg), ('loss',losses_m.avg), ('F1_score', F1_score), ('cm',confusionmatrix)])
+    return OrderedDict([('train_dices',torch.mean(dice_per_batch).item()), ('loss',losses_m.avg)])
     
 
 def val(model, dataloader, criterion,log_interval, args) -> dict:
-    correct = 0
-    total = 0
+
     total_loss = 0
-    cm_m = cmMetter()
+    thr = 0.5
+    best_dice = 0.
+    dices = []
+
     model.eval()
     with torch.no_grad():
-        for idx, (inputs, targets) in enumerate(dataloader):
-            inputs, targets = inputs, targets
+        for idx, (images, masks) in enumerate(dataloader):
+            images, masks = images, masks
+            
             
             # predict
-            outputs = model(inputs)
+            outputs = model(images)['out']
+            
+            output_h, output_w = outputs.size(-2), outputs.size(-1)
+            mask_h, mask_w = masks.size(-2), masks.size(-1)
+            
+            # restore original size
+            if output_h != mask_h or output_w != mask_w:
+                outputs = F.interpolate(outputs, size=(mask_h, mask_w), mode="bilinear")
             
             # get loss 
-            loss = criterion(outputs, targets)
+            loss = criterion(outputs, masks)
             
             # total loss and acc
             total_loss += loss.item()
-            preds = outputToPred(outputs)
-            cm_m.update(preds,targets)
-            correct += targets.eq(preds).sum().item()
-            total += targets.size(0)
+            outputs = torch.sigmoid(outputs)
+            outputs = (outputs > thr).detach().cpu()
+            masks = masks.detach().cpu()
+            
+            dice = dice_coef(outputs, masks)
+            dice_per_batch = torch.mean(dice, dim=0)
+            dices.append(dice)
             
             if idx % log_interval == 0 and idx != 0: 
-                _logger.info('VAL [%d/%d]: Loss: %.3f | Acc: %.3f%% [%d/%d]' % 
-                            (idx+1, len(dataloader), total_loss/(idx+1), 100.*correct/total, correct, total))
+                _logger.info('VAL [%d/%d]: Loss: %.3f | Dice: %.3f%%' % 
+                            (idx+1, len(dataloader), total_loss/(idx+1), torch.mean(dice_per_batch).item()))
 
-        confusionmatrix = toConfusionMatrix(cm_m.pred, cm_m.label, args.num_classes)
-        F1_score = calculateScore(cm_m.pred, cm_m.label, args.num_classes)
+        dices = torch.cat(dices, 0)
+        dices_per_class = torch.mean(dices, 0)
+    return OrderedDict([('dice', torch.mean(dices_per_class).item()), ('loss',total_loss/len(dataloader))])
 
-    return OrderedDict([('acc',correct/total), ('loss',total_loss/len(dataloader)), ('F1_score', F1_score), ('cm',confusionmatrix)])
 
+def fit(model, trainloader, valloader,  criterion, optimizer, lr_scheduler, accelerator, savedir: str, args) -> None:
 
-def fit(
-    model, trainloader, valloader, criterion, optimizer, lr_scheduler, accelerator,
-    savedir: str, args
-) -> None:
-
-    best_F1_score = 0
+    best_dice = 0
     step = 0
     log_interval = 5
+
+    
     for epoch in range(args.epochs):
         _logger.info(f'\nEpoch: {epoch+1}/{args.epochs}')
+        tic = time.time()
         train_metrics = train(model,accelerator, trainloader, criterion, optimizer, log_interval, args)
+        toc = time.time()
+        print(f"{epoch}epoch time : {toc - tic}")
+        
         val_metrics = val(model, valloader, criterion, log_interval,args)
 
         # wandb
@@ -162,6 +171,7 @@ def fit(
         metrics = OrderedDict(lr=optimizer.param_groups[0]['lr'])
         metrics.update([('train_' + k, v) for k, v in train_metrics.items()])
         metrics.update([('val_' + k, v) for k, v in val_metrics.items()])
+        
         if args.use_wandb:
             wandb.log(metrics, step=epoch)
 
@@ -172,21 +182,23 @@ def fit(
             lr_scheduler.step()
 
         # checkpoint
-        if best_F1_score < val_metrics['F1_score']:
+        if best_dice < val_metrics['dice']:
             # save results
-            state = {'best_epoch':epoch, 'best_F1_score':val_metrics['F1_score']}
+            state = {'best_epoch':epoch, 'best_dice':val_metrics['dice']}
             json.dump(state, open(os.path.join(savedir, f'best_results.json'),'w'), indent=4)
 
             # save model
             torch.save(model.state_dict(), os.path.join(savedir, f'best_model.pt'))
             
-            _logger.info('Best F1 score {0:.3%} to {1:.3%}'.format(best_F1_score, val_metrics['F1_score']))
+            _logger.info('Best dice {0:.3%} to {1:.3%}'.format(best_dice, val_metrics['dice']))
 
-            best_F1_score = val_metrics['F1_score']
+            best_dice = val_metrics['dice']
             #save confusion_matrix
-            if args.use_cm:
-                fig = plot_confusion_matrix(val_metrics['cm'],args.num_classes)
-                if args.use_wandb:
-                    wandb.log({'Confusion Matrix': wandb.Image(fig, caption=f"Epoch-{epoch}")},step=epoch)
-                
-    _logger.info('Best Metric: {0:.3%} (epoch {1:})'.format(state['best_F1_score'], state['best_epoch']))
+            # if args.use_cm:
+            #     fig = plot_confusion_matrix(val_metrics['cm'],args.num_classes)
+            #     if args.use_wandb:
+            #         wandb.log({'Confusion Matrix': wandb.Image(fig, caption=f"Epoch-{epoch}")},step=epoch)
+    
+    
+    _logger.info('Best Metric: {0:.3%} (epoch {1:})'.format(state['best_dice'], state['best_epoch']))
+    
