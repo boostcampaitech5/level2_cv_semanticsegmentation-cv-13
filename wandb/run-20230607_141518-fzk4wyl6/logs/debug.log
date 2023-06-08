@@ -1,0 +1,28 @@
+2023-06-07 14:15:18,287 INFO    MainThread:25570 [wandb_setup.py:_flush():76] Current SDK version is 0.15.4
+2023-06-07 14:15:18,287 INFO    MainThread:25570 [wandb_setup.py:_flush():76] Configure stats pid to 25570
+2023-06-07 14:15:18,287 INFO    MainThread:25570 [wandb_setup.py:_flush():76] Loading settings from /opt/ml/.config/wandb/settings
+2023-06-07 14:15:18,287 INFO    MainThread:25570 [wandb_setup.py:_flush():76] Loading settings from /opt/ml/level1_segmentation-cv-13/wandb/settings
+2023-06-07 14:15:18,287 INFO    MainThread:25570 [wandb_setup.py:_flush():76] Loading settings from environment variables: {}
+2023-06-07 14:15:18,287 INFO    MainThread:25570 [wandb_setup.py:_flush():76] Applying setup settings: {'_disable_service': False}
+2023-06-07 14:15:18,287 INFO    MainThread:25570 [wandb_setup.py:_flush():76] Inferring run settings from compute environment: {'program_relpath': 'main.py', 'program': '/opt/ml/level1_segmentation-cv-13/main.py'}
+2023-06-07 14:15:18,287 INFO    MainThread:25570 [wandb_setup.py:_flush():76] Applying login settings: {'api_key': '***REDACTED***'}
+2023-06-07 14:15:18,287 INFO    MainThread:25570 [wandb_init.py:_log_setup():507] Logging user logs to /opt/ml/level1_segmentation-cv-13/wandb/run-20230607_141518-fzk4wyl6/logs/debug.log
+2023-06-07 14:15:18,287 INFO    MainThread:25570 [wandb_init.py:_log_setup():508] Logging internal logs to /opt/ml/level1_segmentation-cv-13/wandb/run-20230607_141518-fzk4wyl6/logs/debug-internal.log
+2023-06-07 14:15:18,288 INFO    MainThread:25570 [wandb_init.py:init():547] calling init triggers
+2023-06-07 14:15:18,288 INFO    MainThread:25570 [wandb_init.py:init():554] wandb.init called with sweep_config: {}
+config: {'use_wandb': True, 'use_cm': False, 'entity': 'connect-cv-13', 'project_name': 'Sementic-Segmentation-HJH', 'exp_name': 'my_test', 'exp_num': 0, 'user_name': 'my_name', 'datadir': '../input/data/', 'train_path': 'train/DCM/', 'label_path': 'train/outputs_json/', 'valid_file': 'valid.csv', 'test_file': 'test.csv', 'transform': ['resize'], 'seed': 223, 'model_name': 'SegModel', 'model_param': {'pretrained': True, 'backbone': 'resnet18'}, 'classes': ['finger-1', 'finger-2', 'finger-3', 'finger-4', 'finger-5', 'finger-6', 'finger-7', 'finger-8', 'finger-9', 'finger-10', 'finger-11', 'finger-12', 'finger-13', 'finger-14', 'finger-15', 'finger-16', 'finger-17', 'finger-18', 'finger-19', 'Trapezium', 'Trapezoid', 'Capitate', 'Hamate', 'Scaphoid', 'Lunate', 'Triquetrum', 'Pisiform', 'Radius', 'Ulna'], 'num_classes': 29, 'batch_size': 8, 'opt_name': 'Adam', 'loss': 'bce_with_logit_loss', 'loss_param': {}, 'lr': 0.0001, 'lr_scheduler': 'StepLR', 'lr_scheduler_param': {'step_size': 3}, 'weight_decay': 1e-06, 'epochs': 150, 'savedir': './checkpoint', 'grad_accum_steps': 1, 'mixed_precision': 'fp16', 'patience': 100}
+2023-06-07 14:15:18,288 INFO    MainThread:25570 [wandb_init.py:init():596] starting backend
+2023-06-07 14:15:18,288 INFO    MainThread:25570 [wandb_init.py:init():600] setting up manager
+2023-06-07 14:15:18,293 INFO    MainThread:25570 [backend.py:_multiprocessing_setup():106] multiprocessing start_methods=fork,spawn,forkserver, using: spawn
+2023-06-07 14:15:18,297 INFO    MainThread:25570 [wandb_init.py:init():606] backend started and connected
+2023-06-07 14:15:18,303 INFO    MainThread:25570 [wandb_init.py:init():703] updated telemetry
+2023-06-07 14:15:18,307 INFO    MainThread:25570 [wandb_init.py:init():736] communicating run to backend with 60.0 second timeout
+2023-06-07 14:15:18,833 INFO    MainThread:25570 [wandb_run.py:_on_init():2176] communicating current version
+2023-06-07 14:15:18,863 INFO    MainThread:25570 [wandb_run.py:_on_init():2185] got version response 
+2023-06-07 14:15:18,864 INFO    MainThread:25570 [wandb_init.py:init():787] starting run threads in backend
+2023-06-07 14:15:24,613 INFO    MainThread:25570 [wandb_run.py:_console_start():2155] atexit reg
+2023-06-07 14:15:24,613 INFO    MainThread:25570 [wandb_run.py:_redirect():2010] redirect: SettingsConsole.WRAP_RAW
+2023-06-07 14:15:24,614 INFO    MainThread:25570 [wandb_run.py:_redirect():2075] Wrapping output streams.
+2023-06-07 14:15:24,614 INFO    MainThread:25570 [wandb_run.py:_redirect():2100] Redirects installed.
+2023-06-07 14:15:24,614 INFO    MainThread:25570 [wandb_init.py:init():828] run started, returning control to user process
+2023-06-07 14:15:47,559 WARNING MsgRouterThr:25570 [router.py:message_loop():77] message_loop has been closed

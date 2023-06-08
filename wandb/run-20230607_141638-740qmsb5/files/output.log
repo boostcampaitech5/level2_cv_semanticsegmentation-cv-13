@@ -1,0 +1,16 @@
+
+Start training...
+Epoch: 1/150
+TRAIN [   6/80] Loss: 0.6207 (0.6551) Dice: 0.033 LR: 1.000e-04 Time: 8.787s
+Traceback (most recent call last):
+  File "/opt/ml/level1_segmentation-cv-13/main.py", line 128, in <module>
+    run(args)
+  File "/opt/ml/level1_segmentation-cv-13/main.py", line 98, in run
+    fit(model        = model,
+  File "/opt/ml/level1_segmentation-cv-13/train.py", line 163, in fit
+    train_metrics = train(model,accelerator, trainloader, criterion, optimizer, log_interval, args)
+  File "/opt/ml/level1_segmentation-cv-13/train.py", line 68, in train
+    with accelerator.accumulate(model):
+  File "/opt/conda/envs/segmentation/lib/python3.10/contextlib.py", line 279, in helper
+    @wraps(func)
+KeyboardInterrupt

@@ -27,4 +27,3 @@ class SegModel(nn.Module):
     def forward(self, x):
         x = self.backbone(x)
         return x
- 
