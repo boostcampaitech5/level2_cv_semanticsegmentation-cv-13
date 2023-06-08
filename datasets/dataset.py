@@ -123,7 +123,6 @@ class XRayDataset(Dataset):
         return len(self.filenames)
     
     def __getitem__(self, item):
-        
         image_name = self.filenames[item]
         image_path = os.path.join(self.image_root, image_name)
         
