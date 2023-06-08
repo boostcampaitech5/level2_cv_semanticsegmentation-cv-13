@@ -117,7 +117,6 @@ def val(model, dataloader, criterion,log_interval, args) -> dict:
         for idx, (images, masks) in enumerate(dataloader):
             images, masks = images, masks
             
-            
             # predict
             outputs = model(images)['out']
             
@@ -172,14 +171,16 @@ def fit(model, trainloader, valloader,  criterion, optimizer, lr_scheduler, acce
         metrics.update([('train_' + k, v) for k, v in train_metrics.items()])
         metrics.update([('val_' + k, v) for k, v in val_metrics.items()])
         
+        print(metrics)
         if args.use_wandb:
+            print("wandb logging")
             wandb.log(metrics, step=epoch)
 
         step += 1
 
         # step scheduler
-        if lr_scheduler:
-            lr_scheduler.step()
+        # if lr_scheduler:
+        #     lr_scheduler.step()
 
         # checkpoint
         if best_dice < val_metrics['dice']:
