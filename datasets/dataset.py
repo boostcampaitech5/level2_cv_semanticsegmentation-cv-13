@@ -170,34 +170,46 @@ class XRayDataset(Dataset):
             
         return image, label
 
-
-class TestDataset(Dataset):
-    """Data loader를 만들기 위한 base dataset class"""
-
+class XRayInferenceDataset(Dataset):
     def __init__(self, args:dict):
-        self.datadir = args.datadir
-        self.test_data = pd.read_csv(os.path.join(self.datadir, args.test_file))
-        self.transform = args.transform
+        self.image_root = os.path.join(args.datadir,args.test_path)
+        
+        pngs = {
+            os.path.relpath(os.path.join(root, fname), start=self.image_root)
+            for root, _dirs, files in os.walk(self.image_root)
+            for fname in files
+            if os.path.splitext(fname)[1].lower() == ".png"
+        }
 
-
+        pngs = sorted(pngs)
+        _filenames = pngs
+        _filenames = np.array(sorted(_filenames))
+        
+        self.filenames = _filenames
+        self.translist = args.transform
+    
     def __len__(self):
-        return len(self.test_data)
+        return len(self.filenames)
+    
+    def __getitem__(self, item):
+        image_name = self.filenames[item]
+        image_path = os.path.join(self.image_root, image_name)
+        
+        image = cv2.imread(image_path)
+        image = image / 255.
+        
+        if self.translist is not None:
+            inputs = {"image": image}
+            transform, cfg = get_transform(self.translist)
+            result = transform(**inputs)
+            image = result["image"]
 
-
-    def __getitem__(self, idx):
-        img = Image.open(os.path.join('../input/data/eval/images', self.test_data.iloc[idx].ImageID))
-        label = self.test_data.iloc[idx].ans
-        if self.transform:
-            test_trans = ["resize","centercrop","totensor","normalize"]
-            trans_list = []
-            for t in self.transform:
-                if t in test_trans:
-                    trans_list.append(t)
-            transform, cfg = get_transform(trans_list)
-            img = transform(img)
-
-        return img, torch.LongTensor([label]).squeeze()
-
+        # to tenser will be done later
+        image = image.transpose(2, 0, 1)    # make channel first
+        
+        image = torch.from_numpy(image).float()
+            
+        return image, image_name
 
 def create_dataloader(dataset, batch_size: int = 4, shuffle: bool = False,num_workers: int = multiprocessing.cpu_count() // 2):
 

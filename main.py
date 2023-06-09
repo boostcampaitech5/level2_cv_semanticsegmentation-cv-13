@@ -82,9 +82,6 @@ def run(args):
     model, optimizer, trainloader, valloader, lr_scheduler = accelerator.prepare(
         model, optimizer, trainloader, valloader, lr_scheduler
     )
-    # model, optimizer, trainloader, lr_scheduler = accelerator.prepare(
-    #     model, optimizer, trainloader, lr_scheduler
-    # )
 
     # initialize wandb
     if args.use_wandb:
