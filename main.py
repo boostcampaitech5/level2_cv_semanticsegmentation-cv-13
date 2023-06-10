@@ -62,8 +62,8 @@ def run(args):
     
     # load dataloader
     print("Loading dataloader...")
-    trainloader = create_dataloader(dataset=trainset, batch_size=args.batch_size, shuffle=True,num_workers=8)
-    valloader = create_dataloader(dataset=valset, batch_size=args.batch_size, shuffle=False,num_workers=0)
+    trainloader = create_dataloader(dataset=trainset, batch_size=args.batch_size, shuffle=True, num_workers=8)
+    valloader = create_dataloader(dataset=valset, batch_size=args.batch_size, shuffle=False, num_workers=0)
     # testloader = create_dataloader(dataset=testset, batch_size=1, shuffle=False)
 
     # set criterion

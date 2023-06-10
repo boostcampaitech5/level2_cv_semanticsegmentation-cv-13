@@ -4,7 +4,7 @@ import matplotlib as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix, f1_score
 import numpy as np
-
+import time
 
 def plot_confusion_matrix(cm, num_classes, normalize=False, save_path=None):
     plt.clf()
@@ -49,3 +49,13 @@ def dice_coef(y_true, y_pred):
     
     eps = 0.0001
     return (2. * intersection + eps) / (torch.sum(y_true_f, -1) + torch.sum(y_pred_f, -1) + eps)
+
+class ElapsedTime():
+    def __init__(self, func):
+        self.func = func
+    
+    def __call__(self):
+        tic = time.time()
+        self.func()
+        toc = time.time()
+        print(f'elapsed time: {toc - tic}s')

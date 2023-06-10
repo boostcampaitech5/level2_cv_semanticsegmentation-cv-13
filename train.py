@@ -115,6 +115,7 @@ def val(model, dataloader, criterion,log_interval, args) -> dict:
     model.eval()
     with torch.no_grad():
         for idx, (images, masks) in enumerate(dataloader):
+            
             images, masks = images, masks
             
             # predict
@@ -161,10 +162,11 @@ def fit(model, trainloader, valloader,  criterion, optimizer, lr_scheduler, acce
         tic = time.time()
         train_metrics = train(model,accelerator, trainloader, criterion, optimizer, log_interval, args)
         toc = time.time()
-        print(f"{epoch}epoch time : {toc - tic}")
-        
+        print(f"epoch {epoch + 1} training time : {toc - tic}s")
+        tic = time.time()
         val_metrics = val(model, valloader, criterion, log_interval,args)
-
+        toc = time.time()
+        print(f"epoch {epoch + 1} validation time : {toc - tic}s")
         # wandb
 
         metrics = OrderedDict(lr=optimizer.param_groups[0]['lr'])
