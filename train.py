@@ -7,8 +7,8 @@ import torch
 from collections import OrderedDict
 import torch.nn.functional as F
 import numpy as np
-from utils.util import plot_confusion_matrix,toConfusionMatrix, calculateScore,dice_coef
-import tqdm
+from utils.util import plot_confusion_matrix,toConfusionMatrix, calculateScore,dice_coef, ElapsedTime
+from tqdm import tqdm
 
 _logger = logging.getLogger('train')
 
@@ -52,7 +52,7 @@ class cmMetter:
             self.pred = np.concatenate((self.pred,pred.cpu().detach().numpy().reshape(-1)))
             self.label = np.concatenate((self.label, label.cpu().detach().numpy()))
 
-
+@ElapsedTime
 def train(model,accelerator, dataloader, criterion, optimizer,log_interval, args) -> dict:   
     losses_m = AverageMeter()
     interval_time = 0
@@ -63,10 +63,10 @@ def train(model,accelerator, dataloader, criterion, optimizer,log_interval, args
     
     model.train()
     optimizer.zero_grad()
-   
-    for idx, (images, masks) in enumerate(dataloader):
+
+    pbar_train = tqdm(dataloader)   
+    for idx, (images, masks) in enumerate(pbar_train):
         with accelerator.accumulate(model):
-            tic = time.time()
             images, masks = images, masks
 
             # predict
@@ -89,23 +89,13 @@ def train(model,accelerator, dataloader, criterion, optimizer,log_interval, args
             dice = dice_coef(outputs, masks)
             dice_per_batch = torch.mean(dice, dim=0)
             
-            toc = time.time()
-            interval_time += toc - tic
-            if idx % log_interval == 0 and idx != 0: 
-                _logger.info('TRAIN [{:>4d}/{}] Loss: {loss.val:>6.4f} ({loss.avg:>6.4f}) '
-                            'Dice: {dice:.3f} '
-                            'LR: {lr:.3e} '
-                            'Time: {batch_time:.3f}s'.format(idx+1, len(dataloader), 
-                                                                                    loss       = losses_m, 
-                                                                                    dice       = torch.mean(dice_per_batch).item(), 
-                                                                                    lr         = optimizer.param_groups[0]['lr'],
-                                                                                    batch_time = interval_time))
-                interval_time = 0
-    
-    return OrderedDict([('train_dices',torch.mean(dice_per_batch).item()), ('loss',losses_m.avg)])
-    
+            pbar_train.set_postfix({'Dice': torch.mean(dice_per_batch).item(), 'Loss': losses_m.val})
 
-def val(model, dataloader, criterion,log_interval, args) -> dict:
+    pbar_train.close()
+    return OrderedDict([('dice',torch.mean(dice_per_batch).item()), ('loss',losses_m.avg)])
+    
+@ElapsedTime
+def val(model, dataloader, criterion, log_interval, args) -> dict:
 
     total_loss = 0
     thr = 0.5
@@ -114,7 +104,8 @@ def val(model, dataloader, criterion,log_interval, args) -> dict:
 
     model.eval()
     with torch.no_grad():
-        for idx, (images, masks) in enumerate(dataloader):
+        pbar_val = tqdm(dataloader)
+        for idx, (images, masks) in enumerate(pbar_val):
             
             images, masks = images, masks
             
@@ -141,12 +132,11 @@ def val(model, dataloader, criterion,log_interval, args) -> dict:
             dice_per_batch = torch.mean(dice, dim=0)
             dices.append(dice)
             
-            if idx % log_interval == 0 and idx != 0: 
-                _logger.info('VAL [%d/%d]: Loss: %.3f | Dice: %.3f%%' % 
-                            (idx+1, len(dataloader), total_loss/(idx+1), torch.mean(dice_per_batch).item()))
+            pbar_val.set_postfix({'Dice': torch.mean(dice_per_batch).item(), 'Loss': total_loss/(idx + 1)})
 
         dices = torch.cat(dices, 0)
         dices_per_class = torch.mean(dices, 0)
+        pbar_val.close()
     return OrderedDict([('dice', torch.mean(dices_per_class).item()), ('loss',total_loss/len(dataloader))])
 
 
@@ -155,18 +145,14 @@ def fit(model, trainloader, valloader,  criterion, optimizer, lr_scheduler, acce
     best_dice = 0
     step = 0
     log_interval = 5
-
     
     for epoch in range(args.epochs):
         _logger.info(f'\nEpoch: {epoch+1}/{args.epochs}')
-        tic = time.time()
-        train_metrics = train(model,accelerator, trainloader, criterion, optimizer, log_interval, args)
-        toc = time.time()
-        print(f"epoch {epoch + 1} training time : {toc - tic}s")
-        tic = time.time()
-        val_metrics = val(model, valloader, criterion, log_interval,args)
-        toc = time.time()
-        print(f"epoch {epoch + 1} validation time : {toc - tic}s")
+        
+        train_metrics = train(model, accelerator, trainloader, criterion, optimizer, log_interval, args)
+        
+        val_metrics = val(model, valloader, criterion, log_interval, args)
+        
         # wandb
 
         metrics = OrderedDict(lr=optimizer.param_groups[0]['lr'])

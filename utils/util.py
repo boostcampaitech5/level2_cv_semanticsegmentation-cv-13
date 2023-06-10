@@ -54,8 +54,9 @@ class ElapsedTime():
     def __init__(self, func):
         self.func = func
     
-    def __call__(self):
+    def __call__(self, *args, **kwargs):
         tic = time.time()
-        self.func()
+        result = self.func(*args, **kwargs)
         toc = time.time()
-        print(f'elapsed time: {toc - tic}s')
+        print(f"elapsed time running function '{self.func.__name__}': {toc - tic}s")
+        return result

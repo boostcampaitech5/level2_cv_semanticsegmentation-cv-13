@@ -1,18 +1,18 @@
 {
-    "use_wandb": false,
+    "use_wandb": true,
     "use_cm": false,
     "entity":"connect-cv-13_2",
-    "project_name": "Sementic-Segmentation-HJH",
+    "project_name": "semantic_segmentation",
     "exp_name": "exp", 
-    "exp_num": 2    ,
-    "user_name": "jh", 
+    "exp_num": 1    ,
+    "user_name": "dh", 
     "datadir": "/opt/ml/input/data/",
     "train_path": "train/DCM/",
     "label_path": "train/outputs_json/",
     "valid_file": "valid.csv",
     "test_file": "test.csv",
     "transform": ["resize"],
-    "seed": 13,
+    "seed": 1207,
     "model_name": "SegModel",
     "model_param":
     {
