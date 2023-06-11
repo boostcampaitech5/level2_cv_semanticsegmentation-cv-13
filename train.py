@@ -158,17 +158,17 @@ def fit(model, trainloader, valloader,  criterion, optimizer, lr_scheduler, acce
     
     for epoch in range(args.epochs):
         _logger.info(f'\nEpoch: {epoch+1}/{args.epochs}')
-        tic = time.time()
-        train_metrics = train(model,accelerator, trainloader, criterion, optimizer, log_interval, args)
-        toc = time.time()
-        print(f"{epoch}epoch time : {toc - tic}")
+        # tic = time.time()
+        # train_metrics = train(model,accelerator, trainloader, criterion, optimizer, log_interval, args)
+        # toc = time.time()
+        # print(f"{epoch}epoch time : {toc - tic}")
         
         val_metrics = val(model, valloader, criterion, log_interval,args)
 
         # wandb
 
         metrics = OrderedDict(lr=optimizer.param_groups[0]['lr'])
-        metrics.update([('train_' + k, v) for k, v in train_metrics.items()])
+        # metrics.update([('train_' + k, v) for k, v in train_metrics.items()])
         metrics.update([('val_' + k, v) for k, v in val_metrics.items()])
         
         print(metrics)

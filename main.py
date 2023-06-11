@@ -11,7 +11,7 @@ import json
 from train import fit
 # from test import test
 from datasets import create_dataloader
-from datasets.dataset import CustomDataset, TestDataset, XRayDataset
+from datasets.dataset import CustomDataset, XRayDataset
 from log import setup_default_logging
 
 from accelerate import Accelerator
