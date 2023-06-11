@@ -57,7 +57,7 @@ def run(args):
     # load dataset
     print("Loading dataset...")
     trainset = XRay_Transform(args=args, is_train=True)
-    valset = XRay_Transform(args=args, is_train=False)
+    valset = XRayDataset(args=args, is_train=False)
     # testset = TestDataset(args=args)
     
     # load dataloader
