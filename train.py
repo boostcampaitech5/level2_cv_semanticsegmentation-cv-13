@@ -72,6 +72,13 @@ def train(model,accelerator, dataloader, criterion, optimizer,log_interval, args
             # predict
             outputs = model(images)['out']
             
+            output_h, output_w = outputs.size(-2), outputs.size(-1)
+            mask_h, mask_w = masks.size(-2), masks.size(-1)
+                
+            # restore original size
+            if output_h != mask_h or output_w != mask_w:
+                outputs = F.interpolate(outputs, size=(mask_h, mask_w), mode="bilinear")
+            
             # get loss & loss backward
             loss = criterion(outputs, masks)
             accelerator.backward(loss)
@@ -111,7 +118,7 @@ def val(model, dataloader, accelerator, criterion,log_interval, args) -> dict:
     thr = 0.5
     best_dice = 0.
     dices = []
-    interval_time = 0
+    interval_time = 5
     
     model.eval()
     with torch.no_grad():
@@ -162,17 +169,13 @@ def fit(model, trainloader, valloader,  criterion, optimizer, lr_scheduler, acce
     
     for epoch in range(args.epochs):
         _logger.info(f'\nEpoch: {epoch+1}/{args.epochs}')
-        tic = time.time()
-        # train_metrics = train(model,accelerator, trainloader, criterion, optimizer, log_interval, args)
-        toc = time.time()
-        print(f"{epoch}epoch time : {toc - tic}")
-        
+        train_metrics = train(model,accelerator, trainloader, criterion, optimizer, log_interval, args) 
         val_metrics = val(model, valloader, accelerator, criterion, log_interval,args)
 
         # wandb
 
         metrics = OrderedDict(lr=optimizer.param_groups[0]['lr'])
-        # metrics.update([('train_' + k, v) for k, v in train_metrics.items()])
+        metrics.update([('train_' + k, v) for k, v in train_metrics.items()])
         metrics.update([('val_' + k, v) for k, v in val_metrics.items()])
         
         print(metrics)
