@@ -5,46 +5,90 @@ import json
 import torch
 import numpy as np
 import pandas as pd
-from collections import OrderedDict
-from utils.util import plot_confusion_matrix, toConfusionMatrix
-from train import AverageMeter, cmMetter, outputToPred
+from utils.util import plot_confusion_matrix, toConfusionMatrix, decode_rle_to_mask, encode_mask_to_rle
+from datasets.dataset import  XRayInferenceDataset
 from torch.utils.data import DataLoader
-from torchvision import transforms
-import multiprocessing
+import torch.nn.functional as F
 from tqdm import tqdm
+import argparse
 
 _logger = logging.getLogger('test')
 
-def test(model, testloader, accelerator, savedir, args) -> dict:   
 
-    source_csv_path = os.path.join(args.datadir, args.test_file)
-    target_csv_path = os.path.join(args.datadir, f'test_{args.exp_name}_{args.exp_num}.csv')
+def test(model, data_loader, args, thr=0.5):
+    CLASS2IND = {v: i for i, v in enumerate(args.classes)}
+    
+    IND2CLASS = {v: k for k, v in CLASS2IND.items()}
 
-    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-
-    print(f'The device_age is ready\t>>\t{device}')
-  
-    print('Loading the model ...')
-    model = model
-
-    print('Loading checkpoint ...')
-    state_dict = torch.load(os.path.join(savedir, f'best_model.pt'))
-    model.load_state_dict(state_dict)
-
-    print("Starting testing ...")
+    
+    model = model.cuda()
     model.eval()
-    result = []
 
-    pbar_test = tqdm(testloader)
-    for _, (test_img, _) in enumerate(pbar_test):
-        pbar_test.set_description(f"Test. iter:")
-        with torch.no_grad():
-            test_img = test_img.to(device)
-            test_pred = torch.max(model(test_img), 1)[1]
-            result.append(test_pred.item())
-    pbar_test.close()
+    rles = []
+    filename_and_class = []
+    with torch.no_grad():
+        n_class = args.num_classes
 
-    df = pd.read_csv(source_csv_path)
-    df['ans'] = result
-    df.to_csv(target_csv_path, index=False)
-    print('Save CSV file', target_csv_path)
+        for step, (images, image_names) in tqdm(enumerate(data_loader), total=len(data_loader)):
+            images = images.cuda()    
+            outputs = model(images)['out']
+            
+            # restore original size
+            outputs = F.interpolate(outputs, size=(2048, 2048), mode="bicubic")
+            outputs = torch.sigmoid(outputs)
+            outputs = (outputs > thr).detach().cpu().numpy()
+            
+            for output, image_name in zip(outputs, image_names):
+                for c, segm in enumerate(output):
+                    rle = encode_mask_to_rle(segm)
+                    rles.append(rle)
+                    filename_and_class.append(f"{IND2CLASS[c]}_{image_name}")
+                    
+    return rles, filename_and_class
+
+def run(args):
+    thr = 0.5
+    
+    model = __import__('models.model', fromlist='model').__dict__[args.model_name](args.num_classes, **args.model_param)
+    model_path = args.savedir + "/my_test/" + "best_model.pt"
+    state_dict = torch.load(model_path)
+    model.load_state_dict(state_dict)
+    
+    test_dataset = XRayInferenceDataset(args)
+    test_loader = DataLoader(
+        dataset=test_dataset, 
+        batch_size=2,
+        shuffle=False,
+        num_workers=2,
+        drop_last=False
+    )
+    print("model testing...")
+    rles, filename_and_class = test(model, test_loader, args, thr)
+    
+    classes, filename = zip(*[x.split("_") for x in filename_and_class])
+    image_name = [os.path.basename(f) for f in filename]
+    
+    df = pd.DataFrame({
+    "image_name": image_name,
+    "class": classes,
+    "rle": rles,
+    })
+    
+    print("result saving...")
+    df.to_csv(args.savedir + "/my_test/" + "output_bicubic.csv", index=False)
+    print("done!")
+    
+
+if __name__=='__main__':
+    parser = argparse.ArgumentParser(description="Classification for Computer Vision")
+
+    with open('config.json') as f:
+        config = json.load(f)
+
+    for key in config:
+        parser_key = key.replace('_', '-')
+        parser.add_argument(f'--{parser_key}', default=config[key], type=type(config[key]))
+
+    args = parser.parse_args()
+    run(args)
+    
