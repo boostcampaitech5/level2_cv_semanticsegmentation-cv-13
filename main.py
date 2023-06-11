@@ -11,7 +11,7 @@ import json
 from train import fit
 # from test import test
 from datasets import create_dataloader
-from datasets.dataset import CustomDataset, TestDataset, XRayDataset
+from datasets.dataset import XRayDataset, XRay_Transform
 from log import setup_default_logging
 
 from accelerate import Accelerator
@@ -56,8 +56,8 @@ def run(args):
 
     # load dataset
     print("Loading dataset...")
-    trainset = XRayDataset(args=args, is_train=True)
-    valset = XRayDataset(args=args, is_train=False)
+    trainset = XRay_Transform(args=args, is_train=True)
+    valset = XRay_Transform(args=args, is_train=False)
     # testset = TestDataset(args=args)
     
     # load dataloader

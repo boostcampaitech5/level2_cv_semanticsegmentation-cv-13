@@ -1,9 +1,9 @@
 {
-    "use_wandb": true,
+    "use_wandb": false,
     "use_cm": false,
     "entity":"connect-cv-13_2",
     "project_name": "Sementic-Segmentation-HJH",
-    "exp_name": "exp", 
+    "exp_name": "exp_test", 
     "exp_num": 2    ,
     "user_name": "jh", 
     "datadir": "../input/data/",
