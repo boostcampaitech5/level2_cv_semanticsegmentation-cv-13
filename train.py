@@ -152,11 +152,10 @@ def val(model, dataloader, accelerator, criterion,log_interval, args) -> dict:
                 toc = time.time()
                 interval_time += toc - tic
                 if idx % log_interval == 0 and idx != 0: 
-                    _logger.info('VAL [%d/%d]: Loss: %.3f | Dice: %.3f%%' 
-                                 'Time: {batch_time:.3f}s'.format(idx+1, len(dataloader), total_loss/(idx+1), torch.mean(dice_per_batch).item(),interval_time))
+                    _logger.info(f'VAL [{idx+1}/{len(dataloader)}]: Loss: {total_loss/(idx+1)} | Dice: {torch.mean(dice_per_batch).item()} Time: {interval_time}s')
 
-            dices = torch.cat(dices, 0)
-            dices_per_class = torch.mean(dices, 0)
+        dices = torch.cat(dices, 0)
+        dices_per_class = torch.mean(dices, 0)
     return OrderedDict([('dice', torch.mean(dices_per_class).item()), ('loss',total_loss/len(dataloader))])
 
 
@@ -164,18 +163,18 @@ def fit(model, trainloader, valloader,  criterion, optimizer, lr_scheduler, acce
 
     best_dice = 0
     step = 0
-    log_interval = 1
+    log_interval = 5
 
     
     for epoch in range(args.epochs):
         _logger.info(f'\nEpoch: {epoch+1}/{args.epochs}')
-        # train_metrics = train(model,accelerator, trainloader, criterion, optimizer, log_interval, args) 
+        train_metrics = train(model,accelerator, trainloader, criterion, optimizer, log_interval, args) 
         val_metrics = val(model, valloader, accelerator, criterion, log_interval,args)
 
         # wandb
 
         metrics = OrderedDict(lr=optimizer.param_groups[0]['lr'])
-        # metrics.update([('train_' + k, v) for k, v in train_metrics.items()])
+        metrics.update([('train_' + k, v) for k, v in train_metrics.items()])
         metrics.update([('val_' + k, v) for k, v in val_metrics.items()])
         
         print(metrics)

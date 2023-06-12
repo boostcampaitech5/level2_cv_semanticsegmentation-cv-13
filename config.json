@@ -1,5 +1,5 @@
 {
-    "use_wandb": false,
+    "use_wandb": true,
     "use_cm": false,
     "entity":"connect-cv-13_2",
     "project_name": "Sementic-Segmentation-HJH",
