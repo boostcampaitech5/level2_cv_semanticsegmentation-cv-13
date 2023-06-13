@@ -34,7 +34,7 @@ def test(model, data_loader, args, thr=0.5):
             outputs = model(images)['out']
             
             # restore original size
-            outputs = F.interpolate(outputs, size=(2048, 2048), mode="bicubic")
+            outputs = F.interpolate(outputs, size=(2048, 2048), mode="bilinear")
             outputs = torch.sigmoid(outputs)
             outputs = (outputs > thr).detach().cpu().numpy()
             
@@ -49,8 +49,10 @@ def test(model, data_loader, args, thr=0.5):
 def run(args):
     thr = 0.5
     
+    save_dir = args.savedir + "/exp/"
+    
     model = __import__('models.model', fromlist='model').__dict__[args.model_name](args.num_classes, **args.model_param)
-    model_path = args.savedir + "/my_test/" + "best_model.pt"
+    model_path = save_dir + "best_model.pt"
     state_dict = torch.load(model_path)
     model.load_state_dict(state_dict)
     
@@ -75,7 +77,7 @@ def run(args):
     })
     
     print("result saving...")
-    df.to_csv(args.savedir + "/my_test/" + "output_bicubic.csv", index=False)
+    df.to_csv(save_dir + f"output_{args.exp_name}.csv", index=False)
     print("done!")
     
 

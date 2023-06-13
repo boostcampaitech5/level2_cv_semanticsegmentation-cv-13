@@ -95,7 +95,7 @@ def train(model,accelerator, dataloader, criterion, optimizer,log_interval, args
     return OrderedDict([('dice',torch.mean(dice_per_batch).item()), ('loss',losses_m.avg)])
     
 @ElapsedTime
-def val(model, dataloader, criterion, log_interval, args) -> dict:
+def val(model, dataloader, accelerator, criterion, log_interval, args) -> dict:
 
     total_loss = 0
     thr = 0.5
@@ -150,8 +150,7 @@ def fit(model, trainloader, valloader,  criterion, optimizer, lr_scheduler, acce
         _logger.info(f'\nEpoch: {epoch+1}/{args.epochs}')
         
         train_metrics = train(model, accelerator, trainloader, criterion, optimizer, log_interval, args)
-        
-        val_metrics = val(model, valloader, criterion, log_interval, args)
+        val_metrics = val(model, valloader, accelerator, criterion, log_interval,args)
         
         # wandb
 
@@ -182,11 +181,6 @@ def fit(model, trainloader, valloader,  criterion, optimizer, lr_scheduler, acce
             _logger.info('Best dice {0:.3%} to {1:.3%}'.format(best_dice, val_metrics['dice']))
 
             best_dice = val_metrics['dice']
-            #save confusion_matrix
-            # if args.use_cm:
-            #     fig = plot_confusion_matrix(val_metrics['cm'],args.num_classes)
-            #     if args.use_wandb:
-            #         wandb.log({'Confusion Matrix': wandb.Image(fig, caption=f"Epoch-{epoch}")},step=epoch)
     
     
     _logger.info('Best Metric: {0:.3%} (epoch {1:})'.format(state['best_dice'], state['best_epoch']))
