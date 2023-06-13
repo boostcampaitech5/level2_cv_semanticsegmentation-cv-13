@@ -72,12 +72,12 @@ def train(model,accelerator, dataloader, criterion, optimizer,log_interval, args
             # predict
             outputs = model(images)['out']
             
-            output_h, output_w = outputs.size(-2), outputs.size(-1)
-            mask_h, mask_w = masks.size(-2), masks.size(-1)
+            # output_h, output_w = outputs.size(-2), outputs.size(-1)
+            # mask_h, mask_w = masks.size(-2), masks.size(-1)
                 
             # restore original size
-            if output_h != mask_h or output_w != mask_w:
-                outputs = F.interpolate(outputs, size=(mask_h, mask_w), mode="bilinear")
+            # if output_h != mask_h or output_w != mask_w:
+            #     outputs = F.interpolate(outputs, size=(mask_h, mask_w), mode="bilinear")
             
             # get loss & loss backward
             loss = criterion(outputs, masks)
@@ -130,12 +130,12 @@ def val(model, dataloader, accelerator, criterion,log_interval, args) -> dict:
                 # predict
                 outputs = model(images)['out']
                 
-                output_h, output_w = outputs.size(-2), outputs.size(-1)
-                mask_h, mask_w = masks.size(-2), masks.size(-1)
+                # output_h, output_w = oute(outputs,puts.size(-2), outputs.size(-1)
+                # mask_h, mask_w = masks.size(-2), masks.size(-1)
                 
                 # restore original size
-                if output_h != mask_h or output_w != mask_w:
-                    outputs = F.interpolate(outputs, size=(mask_h, mask_w), mode="bilinear")
+                # if output_h != mask_h or output_w != mask_w:
+                #     outputs = F.interpolat size=(mask_h, mask_w), mode="bilinear")
                 
                 # get loss 
                 loss = criterion(outputs, masks)
