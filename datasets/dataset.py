@@ -155,12 +155,12 @@ class XRayDataset(Dataset):
             label[..., class_ind] = class_label
         
         if self.translist is not None:
-            inputs = {"image": image, "mask": label} if self.is_train else {"image": image}
+            inputs = {"image": image, "mask": label} #if self.is_train else {"image": image}
             transform, cfg = get_transform(self.translist)
             result = transform(**inputs)
             
             image = result["image"]
-            label = result["mask"] if self.is_train else label
+            label = result["mask"] #if self.is_train else label
 
         # to tenser will be done later
         image = image.transpose(2, 0, 1)    # make channel first
