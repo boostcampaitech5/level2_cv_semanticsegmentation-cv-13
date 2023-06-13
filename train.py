@@ -72,12 +72,6 @@ def train(model,accelerator, dataloader, criterion, optimizer,log_interval, args
             # predict
             outputs = model(images)['out']
             
-            # output_h, output_w = outputs.size(-2), outputs.size(-1)
-            # mask_h, mask_w = masks.size(-2), masks.size(-1)
-                
-            # restore original size
-            # if output_h != mask_h or output_w != mask_w:
-            #     outputs = F.interpolate(outputs, size=(mask_h, mask_w), mode="bilinear")
             
             # get loss & loss backward
             loss = criterion(outputs, masks)
@@ -129,13 +123,6 @@ def val(model, dataloader, accelerator, criterion,log_interval, args) -> dict:
                 
                 # predict
                 outputs = model(images)['out']
-                
-                # output_h, output_w = oute(outputs,puts.size(-2), outputs.size(-1)
-                # mask_h, mask_w = masks.size(-2), masks.size(-1)
-                
-                # restore original size
-                # if output_h != mask_h or output_w != mask_w:
-                #     outputs = F.interpolat size=(mask_h, mask_w), mode="bilinear")
                 
                 # get loss 
                 loss = criterion(outputs, masks)
@@ -200,11 +187,6 @@ def fit(model, trainloader, valloader,  criterion, optimizer, lr_scheduler, acce
             _logger.info('Best dice {0:.3%} to {1:.3%}'.format(best_dice, val_metrics['dice']))
 
             best_dice = val_metrics['dice']
-            #save confusion_matrix
-            # if args.use_cm:
-            #     fig = plot_confusion_matrix(val_metrics['cm'],args.num_classes)
-            #     if args.use_wandb:
-            #         wandb.log({'Confusion Matrix': wandb.Image(fig, caption=f"Epoch-{epoch}")},step=epoch)
     
     
     _logger.info('Best Metric: {0:.3%} (epoch {1:})'.format(state['best_dice'], state['best_epoch']))
