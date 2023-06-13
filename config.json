@@ -43,7 +43,7 @@
     },
     "weight_decay": 1e-6,
     "epochs": 150,
-    "savedir": "./checkpoint",
+    "savedir": "/opt/ml/checkpoint/",
     "grad_accum_steps": 1,
     "mixed_precision": "fp16",
     "patience": 100
