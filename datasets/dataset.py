@@ -9,6 +9,7 @@ import numpy as np
 from sklearn.model_selection import GroupKFold
 import json
 import cv2
+import time
 
 
 class CustomDataset(Dataset):
@@ -64,7 +65,7 @@ class XRayDataset(Dataset):
 
         self.args = args
         self.class2ind = {v: i for i, v in enumerate(self.args.classes)}
-        print("init Check")
+
         pngs = {
             os.path.relpath(os.path.join(root, fname), start=self.image_root)
             for root, _dirs, files in os.walk(self.image_root)
@@ -123,6 +124,7 @@ class XRayDataset(Dataset):
         return len(self.filenames)
     
     def __getitem__(self, item):
+        
         image_name = self.filenames[item]
         image_path = os.path.join(self.image_root, image_name)
         
@@ -140,7 +142,6 @@ class XRayDataset(Dataset):
         with open(label_path, "r") as f:
             annotations = json.load(f)
         annotations = annotations["annotations"]
-        
         # iterate each class
         for ann in annotations:
             c = ann["label"]
@@ -154,12 +155,12 @@ class XRayDataset(Dataset):
             label[..., class_ind] = class_label
         
         if self.translist is not None:
-            inputs = {"image": image, "mask": label} if self.is_train else {"image": image}
+            inputs = {"image": image, "mask": label} #if self.is_train else {"image": image}
             transform, cfg = get_transform(self.translist)
             result = transform(**inputs)
             
             image = result["image"]
-            label = result["mask"] if self.is_train else label
+            label = result["mask"] #if self.is_train else label
 
         # to tenser will be done later
         image = image.transpose(2, 0, 1)    # make channel first
@@ -167,7 +168,7 @@ class XRayDataset(Dataset):
         
         image = torch.from_numpy(image).float()
         label = torch.from_numpy(label).float()
-            
+
         return image, label
 
 class XRayInferenceDataset(Dataset):

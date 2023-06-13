@@ -11,6 +11,7 @@ import json
 from train import fit
 # from test import test
 from datasets import create_dataloader
+
 from datasets.dataset import CustomDataset, XRayDataset
 from log import setup_default_logging
 
@@ -34,7 +35,7 @@ def torch_seed(random_seed):
 
 def run(args):
     # make save directory
-    savedir = os.path.join(args.savedir, args.exp_name)
+    savedir = os.path.join(args.savedir, args.exp_name + str(args.exp_num))
     os.makedirs(savedir, exist_ok=True)
 
     # set logger
@@ -58,13 +59,11 @@ def run(args):
     print("Loading dataset...")
     trainset = XRayDataset(args=args, is_train=True)
     valset = XRayDataset(args=args, is_train=False)
-    # testset = TestDataset(args=args)
     
     # load dataloader
     print("Loading dataloader...")
     trainloader = create_dataloader(dataset=trainset, batch_size=args.batch_size, shuffle=True,num_workers=8)
-    valloader = create_dataloader(dataset=valset, batch_size=args.batch_size, shuffle=False,num_workers=0)
-    # testloader = create_dataloader(dataset=testset, batch_size=1, shuffle=False)
+    valloader = create_dataloader(dataset=valset, batch_size=args.batch_size, shuffle=False,num_workers=8)
 
     # set criterion
     criterion = __import__('losses.loss', fromlist='loss').__dict__[args.loss](**args.loss_param)
