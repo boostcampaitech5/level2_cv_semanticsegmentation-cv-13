@@ -50,7 +50,7 @@ def test(model, data_loader, args, thr=0.5):
 def run(args):
     thr = 0.5
     
-    save_dir = args.savedir + "/exp/"
+    save_dir = args.savedir + "/exp4/"
     
     model = __import__('models.model', fromlist='model').__dict__[args.model_name](args.num_classes, **args.model_param)
     model_path = save_dir + "best_model.pt"
@@ -66,6 +66,7 @@ def run(args):
         drop_last=False
     )
     print("model testing...")
+    print(model_path)
     rles, filename_and_class = test(model, test_loader, args, thr)
     
     classes, filename = zip(*[x.split("_") for x in filename_and_class])

@@ -62,8 +62,8 @@ def run(args):
     
     # load dataloader
     print("Loading dataloader...")
-    trainloader = create_dataloader(dataset=trainset, batch_size=args.batch_size, shuffle=True,num_workers=8)
-    valloader = create_dataloader(dataset=valset, batch_size=args.batch_size, shuffle=False,num_workers=8)
+    trainloader = create_dataloader(dataset=trainset, batch_size=args.batch_size, shuffle=True,num_workers=7)
+    valloader = create_dataloader(dataset=valset, batch_size=args.batch_size, shuffle=False,num_workers=7)
 
     # set criterion
     criterion = __import__('losses.loss', fromlist='loss').__dict__[args.loss](**args.loss_param)

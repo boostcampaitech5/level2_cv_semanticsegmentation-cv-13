@@ -155,13 +155,14 @@ def fit(model, trainloader, valloader,  criterion, optimizer, lr_scheduler, acce
     
     for epoch in range(args.epochs):
         _logger.info(f'\nEpoch: {epoch+1}/{args.epochs}')
+        tic = time.time()
         train_metrics = train(model,accelerator, trainloader, criterion, optimizer, log_interval, args) 
         val_metrics = val(model, valloader, accelerator, criterion, log_interval,args)
 
         # wandb
 
         metrics = OrderedDict(lr=optimizer.param_groups[0]['lr'])
-        # metrics.update([('train_' + k, v) for k, v in train_metrics.items()])
+        metrics.update([('train_' + k, v) for k, v in train_metrics.items()])
         metrics.update([('val_' + k, v) for k, v in val_metrics.items()])
         
         print(metrics)
@@ -188,6 +189,7 @@ def fit(model, trainloader, valloader,  criterion, optimizer, lr_scheduler, acce
 
             best_dice = val_metrics['dice']
     
-    
+        toc = time.time()
+        print(f'Epoch Time: {toc-tic:.3f}s')
     _logger.info('Best Metric: {0:.3%} (epoch {1:})'.format(state['best_dice'], state['best_epoch']))
     

@@ -130,6 +130,7 @@ class XRayDataset(Dataset):
         
         image = cv2.imread(image_path)
         image = image / 255.
+        img1 = image
         
         label_name = self.labelnames[item]
         label_path = os.path.join(self.label_root, label_name)
@@ -155,21 +156,24 @@ class XRayDataset(Dataset):
             label[..., class_ind] = class_label
         
         if self.translist is not None:
-            inputs = {"image": image, "mask": label} #if self.is_train else {"image": image}
+            inputs = {"image": img1, "mask": label} #if self.is_train else {"image": image}
             transform, cfg = get_transform(self.translist)
             result = transform(**inputs)
             
-            image = result["image"]
+            img1 = result["image"]
             label = result["mask"] #if self.is_train else label
 
         # to tenser will be done later
-        image = image.transpose(2, 0, 1)    # make channel first
+        # img1 = np.expand_dims(img1, axis=2)
+        img1 = img1.transpose(2, 0, 1)    # make channel first
         label = label.transpose(2, 0, 1)
         
-        image = torch.from_numpy(image).float()
+        img1 = torch.from_numpy(img1).float()
         label = torch.from_numpy(label).float()
+        
+        # print(img1.shape, label.shape)
 
-        return image, label
+        return img1, label
 
 class XRayInferenceDataset(Dataset):
     def __init__(self, args:dict):
