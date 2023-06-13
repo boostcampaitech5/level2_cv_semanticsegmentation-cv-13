@@ -161,7 +161,7 @@ def fit(model, trainloader, valloader,  criterion, optimizer, lr_scheduler, acce
         # wandb
 
         metrics = OrderedDict(lr=optimizer.param_groups[0]['lr'])
-        metrics.update([('train_' + k, v) for k, v in train_metrics.items()])
+        # metrics.update([('train_' + k, v) for k, v in train_metrics.items()])
         metrics.update([('val_' + k, v) for k, v in val_metrics.items()])
         
         print(metrics)

@@ -4,7 +4,7 @@ import matplotlib as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix, f1_score
 import numpy as np
-
+import time
 
 def plot_confusion_matrix(cm, num_classes, normalize=False, save_path=None):
     plt.clf()
@@ -75,3 +75,15 @@ def encode_mask_to_rle(mask):
     runs = np.where(pixels[1:] != pixels[:-1])[0] + 1
     runs[1::2] -= runs[::2]
     return ' '.join(str(x) for x in runs)
+
+class ElapsedTime():
+    def __init__(self, func):
+        self.func = func
+    
+    def __call__(self, *args, **kwargs):
+        tic = time.time()
+        result = self.func(*args, **kwargs)
+        toc = time.time()
+        print(f"elapsed time running function '{self.func.__name__}': {toc - tic}s")
+        return result
+		
