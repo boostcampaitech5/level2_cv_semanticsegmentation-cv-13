@@ -156,7 +156,16 @@ class XRayDataset(Dataset):
         
         if self.translist is not None:
             inputs = {"image": image, "mask": label} #if self.is_train else {"image": image}
-            transform, cfg = get_transform(self.translist)
+            if self.is_train:
+                transform, cfg = get_transform(self.translist)
+            else:
+                val_trans = ["resize","centercrop","totensor","normalize"]
+                trans_list = []
+                for t in self.translist:
+                    if t in val_trans:
+                        trans_list.append(t)
+                transform, cfg = get_transform(self.translist)
+                
             result = transform(**inputs)
             
             image = result["image"]
