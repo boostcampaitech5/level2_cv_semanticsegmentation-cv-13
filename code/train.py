@@ -18,9 +18,9 @@ from torch.utils.data import DataLoader
 
 import wandb 
 from dataset import XRayDataset 
-
 from utils.loss import create_criterion 
-from dataset import XRayDataset 
+from utils.scheduler import CosineAnnealingWarmUpRestarts
+
 
 CLASSES = [
         'finger-1', 'finger-2', 'finger-3', 'finger-4', 'finger-5',
@@ -161,7 +161,10 @@ def train(IMAGE_ROOT, LABEL_ROOT, SAVED_MODEL, args):
         lr=args.lr,
         weight_decay=1e-6
     )
-    # scheduler = StepLR(optimizer, args.lr_decay_step, gamma=0.5) # 구현 필요 
+    if args.use_scheduler:
+        # scheduler = StepLR(optimizer, args.lr_decay_step, gamma=0.5) 
+        # scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=0.0001, steps_per_epoch=len(train_loader), epochs=args.epoch, pct_start=0.05, anneal_strategy='linear') 
+        scheduler = CosineAnnealingWarmUpRestarts(optimizer, T_0=30, T_mult=1, eta_max=0.0001, T_up=10, gamma=0.6)
     
     # Train model
     print(f'Start training..')
@@ -236,6 +239,7 @@ if __name__ == '__main__':
     parser.add_argument('--model_class', type=str, default='FCN_Resnet50', help='model class type (default: FCN_Resnet50)')
     parser.add_argument('--optimizer', type=str, default='Adam', help='optimizer type (default: Adam)')
     parser.add_argument('--lr', type=float, default=0.0001, help='learning rate (default: 1e-4)')
+    parser.add_argument('--use_scheduler', type=bool, default=False, help='use scheduler (default: False)')
     parser.add_argument('--criterion', type=str, default='BCEWithLogitsLoss', help='criterion type (default: cross_entropy)')
     parser.add_argument('--name', default='exp', help='model save at ./saved_model/{name}')
 
