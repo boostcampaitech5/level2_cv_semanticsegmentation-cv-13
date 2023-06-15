@@ -18,7 +18,7 @@
     "model_param":
     {
         "pretrained": true,
-        "backbone": "resnet18"
+        "backbone": "vit_base_patch16_224_in21k"
     },
     "classes": [
         "finger-1", "finger-2", "finger-3", "finger-4", "finger-5",

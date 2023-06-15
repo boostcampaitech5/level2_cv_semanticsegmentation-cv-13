@@ -210,6 +210,12 @@ class XRayInferenceDataset(Dataset):
         
         if self.translist is not None:
             inputs = {"image": image}
+            val_trans = ["resize","centercrop","totensor","normalize"]
+            trans_list = []
+            for t in self.translist:
+                if t in val_trans:
+                    trans_list.append(t)
+                    
             transform, cfg = get_transform(self.translist)
             result = transform(**inputs)
             image = result["image"]
