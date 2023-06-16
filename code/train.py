@@ -80,7 +80,7 @@ def validation(epoch, model, data_loader, criterion, thr=0.5):
         cnt = 0
 
         for step, (images, masks) in tqdm(enumerate(data_loader), total=len(data_loader)):
-            images, masks = images.cuda(), masks.cuda()         
+            images, masks = torch.from_numpy(images).cuda(), torch.from_numpy(masks).cuda()       
             model = model.cuda()
             
             outputs = model(images)['out']  # models.segmentation.fcn_resnet50() 으로 학습시 사용 (baseline)
@@ -118,6 +118,17 @@ def validation(epoch, model, data_loader, criterion, thr=0.5):
     return avg_dice
 
 
+# shared memory 문제를 해결하기 위한 함수 
+def customcollatefn(sample):
+
+    img, label = list(zip(*sample))
+
+    img = np.array(img, dtype=np.float32)
+    label = np.array(label, dtype=np.float32)
+
+    return img, label
+
+
 def train(IMAGE_ROOT, LABEL_ROOT, SAVED_MODEL, args): 
     # Set device 
     set_seed(args.seed)  
@@ -135,16 +146,18 @@ def train(IMAGE_ROOT, LABEL_ROOT, SAVED_MODEL, args):
     train_loader = DataLoader(
         dataset=train_dataset, 
         batch_size=args.batch_size,
+        collate_fn = customcollatefn,
         shuffle=True,
-        num_workers=0,
-        drop_last=True,  # False로 변경하면??
+        num_workers=8,
+        drop_last=True,  
     )
 
     valid_loader = DataLoader(
         dataset=valid_dataset, 
         batch_size=2,  # 1 
+        collate_fn = customcollatefn,
         shuffle=False,
-        num_workers=0,
+        num_workers=8,
         drop_last=False
     )
     
@@ -175,7 +188,7 @@ def train(IMAGE_ROOT, LABEL_ROOT, SAVED_MODEL, args):
         loss_value = 0
         for step, (images, masks) in enumerate(train_loader):            
             # gpu 연산을 위해 device 할당
-            images, masks = images.cuda(), masks.cuda()
+            images, masks = torch.from_numpy(images).cuda(), torch.from_numpy(masks).cuda()
             model = model.cuda()
             
             # inference
