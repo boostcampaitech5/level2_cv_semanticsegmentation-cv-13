@@ -20,6 +20,7 @@ import wandb
 from dataset import XRayDataset 
 
 from utils.loss import create_criterion 
+from utils.augmentation import create_transforms 
 from dataset import XRayDataset 
 
 CLASSES = [
@@ -136,11 +137,12 @@ def train(IMAGE_ROOT, LABEL_ROOT, SAVED_MODEL, args):
     save_dir = os.path.join(SAVED_MODEL, args.name)
     
     # Get agmentation 
-    tf = A.Resize(512, 512)  # augmentation 따로 빼서 구현할 필요 있음 
+    tf = create_transforms(args.augmentation)
+    val_tf = A.Compose([A.Resize(512, 512)])
     
     # Make dataset 
     train_dataset = XRayDataset(IMAGE_ROOT, LABEL_ROOT, args.fold_num, is_train=True, transforms=tf)
-    valid_dataset = XRayDataset(IMAGE_ROOT, LABEL_ROOT, args.fold_num, is_train=False, transforms=tf)
+    valid_dataset = XRayDataset(IMAGE_ROOT, LABEL_ROOT, args.fold_num, is_train=False, transforms=val_tf)
     
     # Load Data 
     train_loader = DataLoader(
@@ -242,7 +244,7 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', type=int, default=50, help='number of epochs to train (default: 50)') 
     parser.add_argument('--fold_num', type=int, default=0, help='fold number (default: 0)')
     # parser.add_argument('--dataset', type=str, default='XRayDataset', help='dataset augmentation type (default: XRayDataset)')
-    # parser.add_argument('--augmentation', type=str, default='BaseAugmentation', help='data augmentation type (default: BaseAugmentation)')
+    parser.add_argument('--augmentation', type=str, default='BaseAugmentation', help='data augmentation type (default: BaseAugmentation)')
     parser.add_argument('--batch_size', type=int, default=8, help='input batch size for training (default: 64)') 
     parser.add_argument('--log_interval', type=int, default=1, help='how many batches to wait before logging training status')
     parser.add_argument('--model', type=str, default='fcn', help='model type (default: fcn)') 
