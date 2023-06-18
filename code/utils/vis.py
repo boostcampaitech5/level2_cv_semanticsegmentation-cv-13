@@ -25,6 +25,8 @@ CLASS2IND = {v: i for i, v in enumerate(CLASSES)}
 IND2CLASS = {v: k for k, v in CLASS2IND.items()}
 
 def decode_rle_to_mask(rle, height, width):
+    if isinstance(rle, float):
+        return np.zeros((height, width), dtype=np.uint8)
     s = rle.split()
     starts, lengths = [np.asarray(x, dtype=int) for x in (s[0:][::2], s[1:][::2])]
     starts -= 1
