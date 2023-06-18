@@ -2,6 +2,7 @@ import os
 import cv2 
 import numpy as np 
 import pandas as pd 
+import json 
 
 PALETTE = [
     (220, 20, 60), (119, 11, 32), (0, 0, 142), (0, 0, 230), (106, 0, 228),
@@ -25,6 +26,8 @@ CLASS2IND = {v: i for i, v in enumerate(CLASSES)}
 IND2CLASS = {v: k for k, v in CLASS2IND.items()}
 
 def decode_rle_to_mask(rle, height, width):
+    if isinstance(rle, float):
+        return np.zeros((height, width), dtype=np.uint8)
     s = rle.split()
     starts, lengths = [np.asarray(x, dtype=int) for x in (s[0:][::2], s[1:][::2])]
     starts -= 1
@@ -50,19 +53,23 @@ def apply_mask(image, mask, color, alpha=0.5):
     return image 
 
 
-def get_masked_image_form_json(image, annotations, alpha=0.4, class_num=None):
-    draw_img = image.copy()
+def get_masked_image_form_json(image_path, annotation_path, alpha=0.4, class_num=None):
+    image = cv2.imread(image_path) 
+    
+    with open(annotation_path, "r") as f:
+        annotations = json.load(f) 
+    annotations = annotations['annotations']
     
     if class_num is not None:
         points = np.array(annotations[class_num]['points'])
         mask = make_mask(image, points)
-        masked_image = apply_mask(draw_img, mask, PALETTE[class_num], alpha=alpha) 
-        
+        masked_image = apply_mask(image, mask, PALETTE[class_num], alpha=alpha) 
     else: 
         for class_ann in annotations:
             points = np.array(class_ann['points'])
             mask = make_mask(image, points)
-            masked_image = apply_mask(draw_img, mask, PALETTE[CLASS2IND[class_ann['label']]], alpha=alpha)
+            masked_image = apply_mask(image, mask, PALETTE[CLASS2IND[class_ann['label']]], alpha=alpha)
+            
     return masked_image 
 
 
