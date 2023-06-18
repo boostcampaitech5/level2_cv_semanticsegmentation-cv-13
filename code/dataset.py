@@ -133,7 +133,8 @@ class XRayDataset(Dataset):
         image = image.transpose(2, 0, 1)    # make channel first
         label = label.transpose(2, 0, 1)
         
-        image = torch.from_numpy(image).float()
-        label = torch.from_numpy(label).float()
+        # dataset에서 데이터를  numpy 형태로 넘겨주기 위해 주석처리
+        # image = torch.from_numpy(image).float()
+        # label = torch.from_numpy(label).float()
             
         return image, label
