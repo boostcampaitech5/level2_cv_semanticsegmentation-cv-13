@@ -4,12 +4,15 @@
 ```
 |-- README.md
 |-- code
-|   |-- dataset.py
 |   |-- models
 |   |   `-- fcn.py
+|   |`-- utils
+|   |    |-- vis.py
+|   |    |-- ensemble.py
+|   |    `-- loss.py
 |   |-- saved_model
+|   |-- ensemble_submission.ipynb
 |   |-- train.py
-|   `-- utils
-|       `-- loss.py
+|   |-- dataset.py
 `-- data
 ```

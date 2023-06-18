@@ -18,10 +18,10 @@ from torch.utils.data import DataLoader
 
 import wandb 
 from dataset import XRayDataset 
-
 from utils.loss import create_criterion 
 from utils.augmentation import create_transforms 
-from dataset import XRayDataset 
+from utils.scheduler import CosineAnnealingWarmUpRestarts
+
 
 CLASSES = [
         'finger-1', 'finger-2', 'finger-3', 'finger-4', 'finger-5',
@@ -32,7 +32,7 @@ CLASSES = [
         'Triquetrum', 'Pisiform', 'Radius', 'Ulna',
     ] 
 
-# seed 고정이 확실히 되는지 확인할 필요 있음 (동일한 조건에서 학습한 결과가 조금씩 다르게 나옴...) 
+
 def set_seed(seed):
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
@@ -176,7 +176,10 @@ def train(IMAGE_ROOT, LABEL_ROOT, SAVED_MODEL, args):
         lr=args.lr,
         weight_decay=1e-6
     )
-    # scheduler = StepLR(optimizer, args.lr_decay_step, gamma=0.5) # 구현 필요 
+    if args.use_scheduler:
+        # scheduler = StepLR(optimizer, args.lr_decay_step, gamma=0.5) 
+        # scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=0.0001, steps_per_epoch=len(train_loader), epochs=args.epoch, pct_start=0.05, anneal_strategy='linear') 
+        scheduler = CosineAnnealingWarmUpRestarts(optimizer, T_0=30, T_mult=1, eta_max=0.0001, T_up=10, gamma=0.6)
     
     # Train model
     print(f'Start training..')
@@ -233,7 +236,7 @@ def train(IMAGE_ROOT, LABEL_ROOT, SAVED_MODEL, args):
                 save_model(model, epoch) 
 
 if __name__ == '__main__': 
-    wandb.init(project="segmentation", reinit=True)  # team project 추가 필요 
+    wandb.init(project="segmentation", reinit=True)  
     parser = argparse.ArgumentParser() 
     
     parser.add_argument('--image_root', type=str, default="/opt/ml/input/data/train/DCM")
@@ -251,6 +254,7 @@ if __name__ == '__main__':
     parser.add_argument('--model_class', type=str, default='FCN_Resnet50', help='model class type (default: FCN_Resnet50)')
     parser.add_argument('--optimizer', type=str, default='Adam', help='optimizer type (default: Adam)')
     parser.add_argument('--lr', type=float, default=0.0001, help='learning rate (default: 1e-4)')
+    parser.add_argument('--use_scheduler', type=bool, default=False, help='use scheduler (default: False)')
     parser.add_argument('--criterion', type=str, default='BCEWithLogitsLoss', help='criterion type (default: cross_entropy)')
     parser.add_argument('--name', default='exp', help='model save at ./saved_model/{name}')
 
