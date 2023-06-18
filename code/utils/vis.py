@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd 
 import json 
 
+
 PALETTE = [
     (220, 20, 60), (119, 11, 32), (0, 0, 142), (0, 0, 230), (106, 0, 228),
     (0, 60, 100), (0, 80, 100), (0, 0, 70), (0, 0, 192), (250, 170, 30),
@@ -28,6 +29,7 @@ IND2CLASS = {v: k for k, v in CLASS2IND.items()}
 def decode_rle_to_mask(rle, height, width):
     if isinstance(rle, float):
         return np.zeros((height, width), dtype=np.uint8)
+      
     s = rle.split()
     starts, lengths = [np.asarray(x, dtype=int) for x in (s[0:][::2], s[1:][::2])]
     starts -= 1
