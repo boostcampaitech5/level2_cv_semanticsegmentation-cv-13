@@ -5,7 +5,7 @@ import json
 import torch
 import numpy as np
 import pandas as pd
-from utils.util import plot_confusion_matrix, toConfusionMatrix, decode_rle_to_mask, encode_mask_to_rle
+from utils.util import plot_confusion_matrix, toConfusionMatrix, decode_rle_to_mask, encode_mask_to_rle, customcollatefn
 from datasets.dataset import  XRayInferenceDataset
 from torch.utils.data import DataLoader
 import torch.nn.functional as F
@@ -32,6 +32,7 @@ def test(model, data_loader, args, thr=0.5):
 
         for step, (images, image_names) in tqdm(enumerate(data_loader), total=len(data_loader)):
             images = images.cuda()    
+            
             outputs = model(images)['out']
             
             # restore original size
@@ -50,7 +51,7 @@ def test(model, data_loader, args, thr=0.5):
 def run(args):
     thr = 0.5
     
-    save_dir = args.savedir + "/exp4/"
+    save_dir = args.savedir + "/exp_DeepLabv3_resnet1018/"
     
     model = __import__('models.model', fromlist='model').__dict__[args.model_name](args.num_classes, **args.model_param)
     model_path = save_dir + "best_model.pt"
@@ -63,7 +64,7 @@ def run(args):
         batch_size=2,
         shuffle=False,
         num_workers=2,
-        drop_last=False
+        drop_last=False,
     )
     print("model testing...")
     print(model_path)

@@ -1,10 +1,10 @@
 {
-    "use_wandb": false,
+    "use_wandb": true,
     "use_cm": false,
     "entity":"connect-cv-13_2",
     "project_name": "Sementic-Segmentation-HJH",
-    "exp_name": "exp", 
-    "exp_num": 5,
+    "exp_name": "exp_DeepLabv3_resnet101", 
+    "exp_num": 8,
     "user_name": "jh", 
     "datadir": "../input/data/",
     "train_path": "train/DCM/",
@@ -14,11 +14,11 @@
     "test_file": "test.csv",
     "transform": ["resize"],
     "seed": 13,
-    "model_name": "SegModel",
+    "model_name": "DeepLab",
     "model_param":
     {
         "pretrained": true,
-        "backbone": "resnet18"
+        "backbone": "resnet101"
     },
     "classes": [
         "finger-1", "finger-2", "finger-3", "finger-4", "finger-5",
@@ -31,21 +31,21 @@
     "num_classes": 29,
     "batch_size": 8,
     "opt_name": "Adam",
-    "loss": "bce_with_logit_loss",
+    "loss": "combineloss",
     "loss_param":
     {
         
     },
-    "lr": 1e-4,
+    "lr": 1e-3,
     "lr_scheduler":"",
     "lr_scheduler_param":
     {
         "step_size":3
     },
-    "weight_decay": 1e-6,
-    "epochs": 100,
+    "weight_decay": 1e-3,
+    "epochs": 150,
     "savedir": "./checkpoint",
     "grad_accum_steps": 1,
     "mixed_precision": "fp16",
-    "patience": 100
+    "patience": 200
 }

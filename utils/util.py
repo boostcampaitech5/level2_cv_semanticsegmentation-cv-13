@@ -87,3 +87,12 @@ class ElapsedTime():
         print(f"elapsed time running function '{self.func.__name__}': {toc - tic}s")
         return result
 		
+def customcollatefn(sample):
+
+    img,label = list(zip(*sample))
+
+    img = np.array(img,dtype=np.float32)
+
+    label = np.array(label,dtype=np.float32)
+    
+    return img,label

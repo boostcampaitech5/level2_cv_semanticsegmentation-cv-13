@@ -11,6 +11,7 @@ import json
 from train import fit
 # from test import test
 from datasets import create_dataloader
+from utils.util import customcollatefn
 
 from datasets.dataset import CustomDataset, XRayDataset
 from log import setup_default_logging
@@ -53,6 +54,7 @@ def run(args):
 
     # build Model
     model = __import__('models.model', fromlist='model').__dict__[args.model_name](args.num_classes, **args.model_param)
+    print(model)
     _logger.info('# of params: {}'.format(np.sum([p.numel() for p in model.parameters()])))
 
     # load dataset
@@ -62,8 +64,8 @@ def run(args):
     
     # load dataloader
     print("Loading dataloader...")
-    trainloader = create_dataloader(dataset=trainset, batch_size=args.batch_size, shuffle=True,num_workers=7)
-    valloader = create_dataloader(dataset=valset, batch_size=args.batch_size, shuffle=False,num_workers=7)
+    trainloader = create_dataloader(dataset=trainset, batch_size=args.batch_size, shuffle=True,num_workers=8, collate_fn = customcollatefn)
+    valloader = create_dataloader(dataset=valset, batch_size=args.batch_size, shuffle=False,num_workers=8, collate_fn = customcollatefn)
 
     # set criterion
     criterion = __import__('losses.loss', fromlist='loss').__dict__[args.loss](**args.loss_param)

@@ -168,10 +168,8 @@ class XRayDataset(Dataset):
         img1 = img1.transpose(2, 0, 1)    # make channel first
         label = label.transpose(2, 0, 1)
         
-        img1 = torch.from_numpy(img1).float()
-        label = torch.from_numpy(label).float()
-        
-        # print(img1.shape, label.shape)
+        # img1 = torch.from_numpy(img1).float()
+        # label = torch.from_numpy(label).float()
 
         return img1, label
 
@@ -216,12 +214,13 @@ class XRayInferenceDataset(Dataset):
             
         return image, image_name
 
-def create_dataloader(dataset, batch_size: int = 4, shuffle: bool = False,num_workers: int = multiprocessing.cpu_count() // 2):
+def create_dataloader(dataset, batch_size: int = 4, shuffle: bool = False,num_workers: int = multiprocessing.cpu_count() // 2, collate_fn = None):
 
     return DataLoader(
         dataset     = dataset,
         batch_size  = batch_size,
         shuffle     = shuffle,
-        num_workers = num_workers
+        num_workers = num_workers,
+        collate_fn = collate_fn
     )
     

@@ -68,6 +68,8 @@ def train(model,accelerator, dataloader, criterion, optimizer,log_interval, args
         with accelerator.accumulate(model):
             tic = time.time()
             images, masks = images, masks
+            images = torch.from_numpy(images).cuda()
+            masks = torch.from_numpy(masks).cuda()
 
             # predict
             outputs = model(images)['out']
@@ -120,7 +122,8 @@ def val(model, dataloader, accelerator, criterion,log_interval, args) -> dict:
             with accelerator.accumulate(model):
                 tic = time.time()
                 images, masks = images, masks
-                
+                images = torch.from_numpy(images).cuda()
+                masks = torch.from_numpy(masks).cuda()
                 # predict
                 outputs = model(images)['out']
                 
@@ -143,6 +146,12 @@ def val(model, dataloader, accelerator, criterion,log_interval, args) -> dict:
 
         dices = torch.cat(dices, 0)
         dices_per_class = torch.mean(dices, 0)
+        dice_str = [
+                f"{c:<12}: {d.item():.4f}"
+                for c, d in zip(args.classes, dices_per_class)
+                ]
+        dice_str = "\n".join(dice_str)
+        print(dice_str)
     return OrderedDict([('dice', torch.mean(dices_per_class).item()), ('loss',total_loss/len(dataloader))])
 
 
