@@ -155,7 +155,16 @@ class XRayDataset(Dataset):
         
         if self.translist is not None:
             inputs = {"image": image, "mask": label} #if self.is_train else {"image": image}
-            transform, cfg = get_transform(self.translist)
+            if self.is_train:
+                transform, cfg = get_transform(self.translist)
+            else:
+                val_trans = ["resize","centercrop","totensor","normalize"]
+                trans_list = []
+                for t in self.translist:
+                    if t in val_trans:
+                        trans_list.append(t)
+                transform, cfg = get_transform(trans_list)
+                
             result = transform(**inputs)
             
             image = result["image"]
@@ -164,10 +173,8 @@ class XRayDataset(Dataset):
         # to tenser will be done later
         image = image.transpose(2, 0, 1)    # make channel first
         label = label.transpose(2, 0, 1)
-        
-        image = torch.from_numpy(image).float()
-        label = torch.from_numpy(label).float()
-            
+
+
         return image, label
 
 
@@ -201,7 +208,13 @@ class XRayInferenceDataset(Dataset):
         
         if self.translist is not None:
             inputs = {"image": image}
-            transform, cfg = get_transform(self.translist)
+            val_trans = ["resize","centercrop","totensor","normalize"]
+            trans_list = []
+            for t in self.translist:
+                if t in val_trans:
+                    trans_list.append(t)
+                    
+            transform, cfg = get_transform(trans_list)
             result = transform(**inputs)
             image = result["image"]
 
