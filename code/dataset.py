@@ -82,7 +82,7 @@ class XRayDataset(Dataset):
                     filenames = list(_filenames[y])
                     labelnames = list(_labelnames[y])  
 
-                break
+                    break
         
         self.filenames = filenames
         self.labelnames = labelnames
