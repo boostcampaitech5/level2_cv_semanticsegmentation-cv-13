@@ -67,7 +67,7 @@ def train(model,accelerator, dataloader, criterion, optimizer,log_interval, args
     for idx, (images, masks) in enumerate(dataloader):
         with accelerator.accumulate(model):
             tic = time.time()
-            images, masks = images, masks
+            images, masks = images.float(), masks.float()
 
             # predict
             outputs = model(images)['out']
@@ -119,7 +119,7 @@ def val(model, dataloader, accelerator, criterion,log_interval, args) -> dict:
         for idx, (images, masks) in enumerate(dataloader):
             with accelerator.accumulate(model):
                 tic = time.time()
-                images, masks = images, masks
+                images, masks = images.float(), masks.float()
                 
                 # predict
                 outputs = model(images)['out']

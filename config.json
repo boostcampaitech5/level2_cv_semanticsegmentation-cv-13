@@ -4,7 +4,7 @@
     "entity":"connect-cv-13_2",
     "project_name": "Sementic-Segmentation-HJH",
     "exp_name": "exp", 
-    "exp_num": 4    ,
+    "exp_num": 9    ,
     "user_name": "jh", 
     "datadir": "../input/data/",
     "train_path": "train/DCM/",
