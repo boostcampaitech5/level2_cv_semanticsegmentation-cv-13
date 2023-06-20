@@ -2,6 +2,8 @@ import os
 import numpy as np 
 import pandas as pd 
 import matplotlib.pyplot as plt
+import tqdm 
+import torch 
 
 
 def encode_mask_to_rle(mask):
@@ -90,9 +92,118 @@ def get_ensemble_result(output_paths, save_path, split_num, thr):
             thr: int, binary mask로 만들기 위한 threshold 값 (몇 개의 모델이 해당 픽셀을 positive로 예측했는지)
     '''
     rles_df = pd.read_csv(output_paths[0])   
-    
+
     rles = get_ensemble_rles(output_paths, split_num, thr)
+
+    submission = rles_df.copy() 
+    submission['rle'] = rles 
+    submission.to_csv(save_path, index=False)  
+
+
+def dice_coef(y_true, y_pred):  
+    y_true_f = y_true.flatten(2)
+    y_pred_f = y_pred.flatten(2)
+    intersection = torch.sum(y_true_f * y_pred_f, -1)
+    
+    eps = 0.0001
+    return (2. * intersection + eps) / (torch.sum(y_true_f, -1) + torch.sum(y_pred_f, -1) + eps)
+
+
+def get_best_model_idx(model_paths, data_loader, append_dice:list=None):
+    dices_per_model = [] 
+    for model_path in model_paths:
+        model = torch.load(model_path)
+        model = model.cuda() 
+        model.eval()
+        
+        dices = [] 
+        with torch.no_grad(): 
+        
+            for i, (images, masks) in tqdm(enumerate(data_loader), total=len(data_loader)):
+                images, masks = torch.from_numpy(images).cuda(), torch.from_numpy(masks).cuda()
+
+                pred = model(images)
+                
+                pred = torch.sigmoid(pred)
+                pred = (pred > 0.5).detach().cpu() 
+                masks = masks.detach().cpu() 
+                
+                dice = dice_coef(masks, pred)
+                dices.append(dice)
+                
+        dices = torch.cat(dices, 0)
+        dices_per_class = torch.mean(dices, 0)
+        dices_per_model.append(dices_per_class.numpy())  
+    
+    if append_dice is not None: 
+        for dices in append_dice: 
+            dices_per_model.append(np.array(dices))
+        
+    for i, dices in enumerate(dices_per_model): 
+        print(f'model {i}: ', list(dices))
+        
+    best_model_idx_per_class = np.argmax(np.array(dices_per_model), 0)
+            
+    return best_model_idx_per_class  
+
+
+def get_weighted_ensemble_mask(output_paths, start_idx, end_idx, best_model_idx_per_class, weight, thr):  
+    
+    total_masks = None 
+    for idx, output_path in enumerate(output_paths):   
+        rle_df = pd.read_csv(output_path) 
+        rles = list(rle_df['rle'][start_idx:end_idx]) 
+        
+        masks = [] 
+        for best_idx, rle in zip(best_model_idx_per_class, rles): 
+            if rle != '' and type(rle) != float:
+                mask = decode_rle_to_mask(rle, height=2048, width=2048)
+            else: 
+                mask = np.zeros((2048, 2048), dtype=np.uint8)
+                
+            if idx == best_idx: 
+                mask = mask * weight 
+            
+            masks.append(mask) 
+        
+        masks = np.stack(masks, 0)  
+        
+        if total_masks is None: 
+            total_masks = masks
+        else: 
+            total_masks += masks 
+
+    total_masks[total_masks < thr] = 0  
+    total_masks[total_masks >= thr] = 1 
+    
+    return total_masks 
+
+
+def get_weighed_ensemble_rles(output_paths, best_model_idx_per_class, weight, thr):  
+    step = 8700 // 300 
+    
+    rles = [] 
+    for count in tqdm(range(300)): 
+        start_idx = count * step 
+        end_idx = start_idx + step 
+        
+        sub_masks = get_weighted_ensemble_mask(output_paths, start_idx, end_idx, best_model_idx_per_class, weight, thr) 
+        
+        for mask in sub_masks: 
+            rle = encode_mask_to_rle(mask)
+            rles.append(rle)
+            
+    return rles 
+
+
+def get_weighed_ensemble_result(output_paths, save_path, best_model_idx_per_class, weight, thr): 
+    rles_df = pd.read_csv(output_paths[0])   
+    
+    rles = get_weighed_ensemble_rles(output_paths, best_model_idx_per_class, weight, thr)
     
     submission = rles_df.copy() 
     submission['rle'] = rles 
     submission.to_csv(save_path, index=False) 
+    
+    print()
+    print('Done!')
