@@ -81,6 +81,11 @@ class XRayDataset(Dataset):
         pngs = sorted(pngs)
         jsons = sorted(jsons)
         
+        pngs.remove('ID058/image1661392064531.png')
+        pngs.remove('ID058/image1661392103627.png')
+        jsons.remove('ID058/image1661392064531.json')
+        jsons.remove('ID058/image1661392103627.json')
+        
         _filenames = np.array(pngs)
         _labelnames = np.array(jsons)
         
@@ -164,7 +169,7 @@ class XRayDataset(Dataset):
                 for t in self.translist:
                     if t in val_trans:
                         trans_list.append(t)
-                transform, cfg = get_transform(self.translist)
+                transform, cfg = get_transform(trans_list)
                 
             result = transform(**inputs)
             

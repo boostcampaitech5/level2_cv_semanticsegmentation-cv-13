@@ -32,7 +32,7 @@ def test(model, data_loader, args, thr=0.5):
 
         for step, (images, image_names) in tqdm(enumerate(data_loader), total=len(data_loader)):
             images = images.cuda()    
-            outputs = model(images)['out']
+            outputs = model(images)#['out']
             
             # restore original size
             outputs = F.interpolate(outputs, size=(2048, 2048), mode="bilinear")
@@ -50,10 +50,10 @@ def test(model, data_loader, args, thr=0.5):
 def run(args):
     thr = 0.5
     
-    save_dir = args.savedir + "/exp/"
+    save_dir = os.path.join(args.savedir, args.exp_name+str(args.exp_num))
     
     model = __import__('models.model', fromlist='model').__dict__[args.model_name](args.num_classes, **args.model_param)
-    model_path = save_dir + "best_model.pt"
+    model_path = save_dir + "/best_model.pt"
     state_dict = torch.load(model_path)
     model.load_state_dict(state_dict)
     
@@ -78,7 +78,7 @@ def run(args):
     })
     
     print("result saving...")
-    df.to_csv(save_dir + f"output_{args.exp_name}.csv", index=False)
+    df.to_csv(save_dir + f"/output_{args.exp_name}.csv", index=False)
     print("done!")
     
 

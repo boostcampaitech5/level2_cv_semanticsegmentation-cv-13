@@ -70,7 +70,7 @@ def train(model,accelerator, dataloader, criterion, optimizer,log_interval, args
             images, masks = images.float(), masks.float()
 
             # predict
-            outputs = model(images)['out']
+            outputs = model(images)#['out']
             
             
             # get loss & loss backward
@@ -89,6 +89,7 @@ def train(model,accelerator, dataloader, criterion, optimizer,log_interval, args
             
             dice = dice_coef(outputs, masks)
             dice_per_batch = torch.mean(dice, dim=0)
+            dices.append(dice)
             
             toc = time.time()
             interval_time += toc - tic
@@ -102,8 +103,9 @@ def train(model,accelerator, dataloader, criterion, optimizer,log_interval, args
                                                                                     lr         = optimizer.param_groups[0]['lr'],
                                                                                     batch_time = interval_time))
                 interval_time = 0
-    
-    return OrderedDict([('train_dices',torch.mean(dice_per_batch).item()), ('loss',losses_m.avg)])
+    dices = torch.cat(dices, 0)
+    dices_per_class = torch.mean(dices, 0)
+    return OrderedDict([('train_dices',torch.mean(dices_per_class).item()), ('loss',losses_m.avg)])
     
 
 def val(model, dataloader, accelerator, criterion,log_interval, args) -> dict:
@@ -122,7 +124,7 @@ def val(model, dataloader, accelerator, criterion,log_interval, args) -> dict:
                 images, masks = images.float(), masks.float()
                 
                 # predict
-                outputs = model(images)['out']
+                outputs = model(images)#['out']
                 
                 # get loss 
                 loss = criterion(outputs, masks)
@@ -161,7 +163,7 @@ def fit(model, trainloader, valloader,  criterion, optimizer, lr_scheduler, acce
         # wandb
 
         metrics = OrderedDict(lr=optimizer.param_groups[0]['lr'])
-        # metrics.update([('train_' + k, v) for k, v in train_metrics.items()])
+        metrics.update([('train_' + k, v) for k, v in train_metrics.items()])
         metrics.update([('val_' + k, v) for k, v in val_metrics.items()])
         
         print(metrics)

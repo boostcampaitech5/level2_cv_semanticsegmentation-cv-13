@@ -54,6 +54,18 @@ class F1Loss(nn.Module):
         f1 = f1.clamp(min=self.epsilon, max=1 - self.epsilon)
         return 1 - f1.mean()
     
+class CombineLoss(nn.Module):
+    def __init__(self, bce_weight = 0.5):
+        super().__init__()
+        self.bce_weight = bce_weight
+
+    def forward(self, pred, target):
+        bce = F.binary_cross_entropy_with_logits(pred, target)
+        pred = F.sigmoid(pred)
+        dice = dice_loss(pred, target)
+        loss = bce * self.bce_weight + dice * (1 - self.bce_weight)
+        
+        return loss
 
 def crossentropy():
     criterion = nn.CrossEntropyLoss()
@@ -81,4 +93,16 @@ def focalloss(gamma=2,alpha=0.25,device='cpu'):
 
 def bce_with_logit_loss():
     criterion = nn.BCEWithLogitsLoss()
+    return criterion
+
+def dice_loss(pred, target, smooth = 1.):
+    pred = pred.contiguous()
+    target = target.contiguous()   
+    intersection = (pred * target).sum(dim=2).sum(dim=2)
+    loss = (1 - ((2. * intersection + smooth) / (pred.sum(dim=2).sum(dim=2) +   target.sum(dim=2).sum(dim=2) + smooth)))
+    return loss.mean()
+    
+
+def combineloss(bce_weight = 0.5):
+    criterion = CombineLoss(bce_weight = 0.5)
     return criterion

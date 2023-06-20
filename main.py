@@ -9,7 +9,7 @@ import logging
 import json
 
 from train import fit
-# from test import test
+from test import test
 from datasets import create_dataloader
 
 from datasets.dataset import CustomDataset, XRayDataset
@@ -84,7 +84,7 @@ def run(args):
 
     # initialize wandb
     if args.use_wandb:
-        wandb.init(name     = f'{args.exp_name}_{args.exp_num}.{args.user_name}', 
+        wandb.init(name     = f'{args.exp_name}{args.exp_num}.{args.user_name}', 
                    project  = args.project_name, 
                    entity   = args.entity,
                    config   = args)
@@ -101,12 +101,12 @@ def run(args):
         savedir      = savedir,
         args         = args)
 
-    # testing model
-    # test(model        = model,
-    #     #  testloader   = testloader,
-    #      accelerator  = accelerator,
-    #      savedir      = savedir,
-    #      args         = args)
+    #testing model
+    test(model        = model,
+        #  testloader   = testloader,
+         accelerator  = accelerator,
+         savedir      = savedir,
+         args         = args)
 
 
 if __name__=='__main__':

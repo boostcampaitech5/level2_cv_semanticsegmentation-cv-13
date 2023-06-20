@@ -3,8 +3,8 @@
     "use_cm": false,
     "entity":"connect-cv-13_2",
     "project_name": "Sementic-Segmentation-HJH",
-    "exp_name": "exp", 
-    "exp_num": 4    ,
+    "exp_name": "exp_Hrnet_512_", 
+    "exp_num": 11    ,
     "user_name": "jh", 
     "datadir": "../input/data/",
     "train_path": "train/DCM/",
@@ -14,11 +14,11 @@
     "test_file": "test.csv",
     "transform": ["resize"],
     "seed": 13,
-    "model_name": "SegModel",
+    "model_name": "Unet",
     "model_param":
     {
         "pretrained": true,
-        "backbone": "vit_base_patch16_224_in21k"
+        "backbone": "mit_b4"
     },
     "classes": [
         "finger-1", "finger-2", "finger-3", "finger-4", "finger-5",
@@ -31,12 +31,12 @@
     "num_classes": 29,
     "batch_size": 8,
     "opt_name": "Adam",
-    "loss": "bce_with_logit_loss",
+    "loss": "combineloss",
     "loss_param":
     {
         
     },
-    "lr": 1e-4,
+    "lr": 1e-5,
     "lr_scheduler":"",
     "lr_scheduler_param":
     {
