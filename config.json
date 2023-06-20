@@ -14,11 +14,11 @@
     "test_file": "test.csv",
     "transform": ["resize"],
     "seed": 13,
-    "model_name": "SegModel",
+    "model_name": "Unet",
     "model_param":
     {
         "pretrained": true,
-        "backbone": "vit_base_patch16_224_in21k"
+        "backbone": "resnet50"
     },
     "classes": [
         "finger-1", "finger-2", "finger-3", "finger-4", "finger-5",
