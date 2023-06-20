@@ -16,14 +16,6 @@ class DeeplabV3_Resnet50(nn.Module):
     def forward(self, x): 
         return self.deeplab_v3(x)   
 
-def conv_block(in_ch, out_ch, k_size, stride, padding, dilation=1, relu=True):
-    block = []
-    block.append(nn.Conv2d(in_ch, out_ch, k_size, stride, padding, dilation, bias=False))
-    block.append(nn.BatchNorm2d(out_ch))
-    if relu:
-        block.append(nn.ReLU())
-    return nn.Sequential(*block) 
-
 
 class DeeplabV3_Resnet101(nn.Module): 
     def __init__(self, num_classes=29): 
