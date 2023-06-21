@@ -242,7 +242,7 @@ if __name__ == '__main__':
     
     parser.add_argument('--image_root', type=str, default="/opt/ml/input/data/train/DCM")
     parser.add_argument('--label_root', type=str, default="/opt/ml/input/data/train/outputs_json")
-    parser.add_argument('--saved_model_dir', type=str, default="/opt/ml/input/code/saved_model") 
+    parser.add_argument('--saved_model_dir', type=str, default="/opt/ml/checkpoint/") 
 
     parser.add_argument('--seed', type=int, default=21, help='random seed (default: 21)') 
     parser.add_argument('--epochs', type=int, default=50, help='number of epochs to train (default: 50)') 
@@ -257,7 +257,7 @@ if __name__ == '__main__':
     parser.add_argument('--lr', type=float, default=0.0001, help='learning rate (default: 1e-4)')
     parser.add_argument('--use_scheduler', type=bool, default=False, help='use scheduler (default: False)')
     parser.add_argument('--criterion', type=str, default='BCEWithLogitsLoss', help='criterion type (default: cross_entropy)')
-    parser.add_argument('--name', default='exp', help='model save at ./saved_model/{name}')
+    parser.add_argument('--name', default='exp', help='model save at /opt/ml/checkpoint/{name}')
 
 
     args = parser.parse_args()
