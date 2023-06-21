@@ -87,7 +87,7 @@ def inference(image_root, saved_model_dir, exp_name, file_name, args):
     model = load_model(saved_model_path, args).to(device)
     model.eval()
 
-    tf = A.Resize(512, 512)
+    tf = A.Resize(1024, 1024)
     test_dataset = XRayInferenceDataset(image_root, tf)
     test_loader = DataLoader(
         dataset=test_dataset, 
@@ -122,7 +122,7 @@ if __name__ == '__main__':
 
     # Container environment
     parser.add_argument('--image_root', type=str, default="/opt/ml/input/data/test/DCM")
-    parser.add_argument('--saved_model_dir', type=str, default="/opt/ml/input/code/saved_model") 
+    parser.add_argument('--saved_model_dir', type=str, default="/opt/ml/checkpoint/") 
     parser.add_argument('--exp_name', type=str, default='exp1') 
     parser.add_argument('--file_name', type=str, default='output') 
 
