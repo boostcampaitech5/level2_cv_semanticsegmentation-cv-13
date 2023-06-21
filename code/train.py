@@ -138,11 +138,12 @@ def train(IMAGE_ROOT, LABEL_ROOT, SAVED_MODEL, args):
     
     # Get agmentation 
     tf = create_transforms(args.augmentation)
-    val_tf = A.Compose([A.Resize(512, 512)])
+    val_tf = A.Compose([A.Resize(1024, 1024)])
     
     # Make dataset 
     train_dataset = XRayDataset(IMAGE_ROOT, LABEL_ROOT, args.fold_num, is_train=True, transforms=tf)
     valid_dataset = XRayDataset(IMAGE_ROOT, LABEL_ROOT, args.fold_num, is_train=False, transforms=val_tf)
+    # valid_dataset = XRayDataset(IMAGE_ROOT, LABEL_ROOT, args.fold_num, is_train=False, transforms=tf)
     
     # Load Data 
     train_loader = DataLoader(
@@ -197,8 +198,8 @@ def train(IMAGE_ROOT, LABEL_ROOT, SAVED_MODEL, args):
             model = model.cuda()
             
             # inference
-            outputs = model(images)['out'] 
-            # outputs = model(images)
+            # outputs = model(images)['out'] 
+            outputs = model(images)
             
             # loss 계산
             loss = criterion(outputs, masks)
@@ -236,7 +237,7 @@ def train(IMAGE_ROOT, LABEL_ROOT, SAVED_MODEL, args):
                 save_model(model, epoch) 
 
 if __name__ == '__main__': 
-    wandb.init(project="segmentation", reinit=True)  
+    wandb.init(entity, project="semantic_segmentation", reinit=True)
     parser = argparse.ArgumentParser() 
     
     parser.add_argument('--image_root', type=str, default="/opt/ml/input/data/train/DCM")
