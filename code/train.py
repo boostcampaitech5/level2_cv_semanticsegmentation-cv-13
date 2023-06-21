@@ -84,8 +84,8 @@ def validation(epoch, model, data_loader, criterion, thr=0.5):
             images, masks = torch.from_numpy(images).cuda(), torch.from_numpy(masks).cuda()       
             model = model.cuda()
             
-            outputs = model(images)['out']  # models.segmentation.fcn_resnet50() 으로 학습시 사용 (baseline)
-            # outputs = model(images)  # 미션 코드로 학습시 사용 
+            # outputs = model(images)['out']  # models.segmentation.fcn_resnet50() 으로 학습시 사용 (baseline)
+            outputs = model(images)  # 미션 코드로 학습시 사용 
             
             output_h, output_w = outputs.size(-2), outputs.size(-1)
             mask_h, mask_w = masks.size(-2), masks.size(-1)
