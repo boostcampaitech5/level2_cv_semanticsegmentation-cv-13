@@ -237,7 +237,7 @@ def train(IMAGE_ROOT, LABEL_ROOT, SAVED_MODEL, args):
                 save_model(model, epoch) 
 
 if __name__ == '__main__': 
-    wandb.init(entity, project="semantic_segmentation", reinit=True)
+    wandb.init(entity="connect-cv-13_2", project="semantic_segmentation", reinit=True)
     parser = argparse.ArgumentParser() 
     
     parser.add_argument('--image_root', type=str, default="/opt/ml/input/data/train/DCM")
