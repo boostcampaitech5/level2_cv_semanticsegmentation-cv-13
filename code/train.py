@@ -248,7 +248,7 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', type=int, default=50, help='number of epochs to train (default: 50)') 
     parser.add_argument('--fold_num', type=int, default=0, help='fold number (default: 0)')
     # parser.add_argument('--dataset', type=str, default='XRayDataset', help='dataset augmentation type (default: XRayDataset)')
-    parser.add_argument('--augmentation', type=str, default='BaseAugmentation', help='data augmentation type (default: BaseAugmentation)')
+    parser.add_argument('--augmentation', type=str, default='CustomAugmentation', help='data augmentation type (default: BaseAugmentation)')
     parser.add_argument('--batch_size', type=int, default=8, help='input batch size for training (default: 64)') 
     parser.add_argument('--log_interval', type=int, default=1, help='how many batches to wait before logging training status')
     parser.add_argument('--model', type=str, default='fcn', help='model type (default: fcn)') 
