@@ -13,9 +13,11 @@ from test import test
 from datasets import create_dataloader
 
 from datasets.dataset import CustomDataset, XRayDataset
+from utils.util import CosineAnnealingWarmUpRestarts
 from log import setup_default_logging
 
 from accelerate import Accelerator
+
 
 _logger = logging.getLogger('train')
 
@@ -74,8 +76,12 @@ def run(args):
     # scheduler
     if args.lr_scheduler:
         lr_scheduler = __import__('torch.optim.lr_scheduler', fromlist='lr_scheduler').__dict__[args.lr_scheduler](optimizer, **args.lr_scheduler_param)
+        # lr_scheduler = CosineAnnealingWarmUpRestarts(optimizer, **args.lr_scheduler_param)
+        print(args.lr_scheduler)
     else:
         lr_scheduler = None
+    
+    
 
     # prepraring accelerator
     model, optimizer, trainloader, valloader, lr_scheduler = accelerator.prepare(

@@ -218,7 +218,7 @@ class XRayInferenceDataset(Dataset):
                 if t in val_trans:
                     trans_list.append(t)
                     
-            transform, cfg = get_transform(self.translist)
+            transform, cfg = get_transform(trans_list)
             result = transform(**inputs)
             image = result["image"]
 

@@ -3,7 +3,7 @@
     "use_cm": false,
     "entity":"connect-cv-13_2",
     "project_name": "Sementic-Segmentation-HJH",
-    "exp_name": "exp_Unet_mit_512_", 
+    "exp_name": "exp_Unet_mit_1024_", 
     "exp_num": 13    ,
     "user_name": "jh", 
     "datadir": "../input/data/",
@@ -12,7 +12,7 @@
     "label_path": "train/outputs_json/",
     "valid_file": "valid.csv",
     "test_file": "test.csv",
-    "transform": ["resize"],
+    "transform": ["resize","randomhorizontalflip","randomrotation"],
     "seed": 13,
     "model_name": "Unet",
     "model_param":
@@ -29,18 +29,19 @@
         "Triquetrum", "Pisiform", "Radius", "Ulna"
     ],
     "num_classes": 29,
-    "batch_size": 16,
+    "batch_size": 2,
     "opt_name": "Adam",
     "loss": "combineloss",
     "loss_param":
     {
         
     },
-    "lr": 1e-5,
-    "lr_scheduler":"",
+    "lr": 0.001,
+    "lr_scheduler":"MultiStepLR",
     "lr_scheduler_param":
     {
-        "step_size":3
+        "milestones":[4,30,50,100],
+        "gamma":0.5
     },
     "weight_decay": 1e-6,
     "epochs": 200,

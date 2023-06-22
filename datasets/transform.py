@@ -15,7 +15,10 @@ def get_transform(transform_list:list):
                            'std' : (0.2331, 0.2430, 0.2456)}}
     
     transform_dict = {'resize' : A.Resize(tf_list['resize']['img_height'], 
-                                            tf_list['resize']['img_width'])
+                                            tf_list['resize']['img_width']),
+                      'randomrotation' : A.Rotate(tf_list['randomrotation']['degrees'],p=0.5),
+                      'randomhorizontalflip' : A.HorizontalFlip(tf_list['randomhorizontalflip']['flip_prob']),
+
                     #   'totensor' : transforms.ToTensor(),
                     #   'normalize' : transforms.Normalize(mean=statistic[tf_list['normalize']['normalize_statistic']]['mean'],
                     #                                      std=statistic[tf_list['normalize']['normalize_statistic']]['std']),
@@ -26,12 +29,10 @@ def get_transform(transform_list:list):
                     #                                          tf_list['colorjitter']['saturation'], 
                     #                                          tf_list['colorjitter']['hue']),
                     #   'randomhorizontalflip' : transforms.RandomHorizontalFlip(tf_list['randomhorizontalflip']['flip_prob']),
-                    #   'randomrotation' : transforms.RandomRotation(tf_list['randomrotation']['degrees']),
+                      
                     #   'gaussianblur' : transforms.GaussianBlur(tf_list['gaussianblur']['kernel_size'],
                     #                                            (tf_list['gaussianblur']['sigma_min'], tf_list['gaussianblur']['sigma_max'])),
-                    #   'randomaffine': transforms.RandomAffine(degrees=tf_list['randomaffine']['degrees'],
-                    #                                           shear=tuple(tf_list['randomaffine']['shear']),
-                    #                                           translate=tuple(tf_list['randomaffine']['translate']))
+                   
                       }
     
     list_ = []
