@@ -1,7 +1,7 @@
 {
 	"resize": {
-		"img_width": 512,
-		"img_height": 512
+		"img_width": 1024,
+		"img_height": 1024
 	},
 	"totensor": {},
 	"normalize": {

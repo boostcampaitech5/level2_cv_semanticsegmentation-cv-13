@@ -50,7 +50,7 @@ def test(model, data_loader, args, thr=0.5):
 def run(args):
     thr = 0.5
     
-    save_dir = args.savedir + "/exp/"
+    save_dir = args.savedir + "/exp_DeepLabv3_resnet1018/"
     
     model = __import__('models.model', fromlist='model').__dict__[args.model_name](args.num_classes, **args.model_param)
     model_path = save_dir + "best_model.pt"
@@ -78,7 +78,7 @@ def run(args):
     })
     
     print("result saving...")
-    df.to_csv(save_dir + f"output_{args.exp_name}.csv", index=False)
+    df.to_csv(save_dir + f"output_{args.exp_name}_1.csv", index=False)
     print("done!")
     
 

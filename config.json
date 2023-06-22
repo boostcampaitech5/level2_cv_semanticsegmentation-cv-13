@@ -3,7 +3,7 @@
     "use_cm": false,
     "entity":"connect-cv-13_2",
     "project_name": "Sementic-Segmentation-HJH",
-    "exp_name": "exp", 
+    "exp_name": "temp", 
     "exp_num": 9    ,
     "user_name": "jh", 
     "datadir": "../input/data/",
@@ -18,7 +18,7 @@
     "model_param":
     {
         "pretrained": true,
-        "backbone": "resnet50"
+        "backbone": "mit_b5"
     },
     "classes": [
         "finger-1", "finger-2", "finger-3", "finger-4", "finger-5",
