@@ -123,8 +123,8 @@ if __name__ == '__main__':
     # Container environment
     parser.add_argument('--image_root', type=str, default="/opt/ml/input/data/test/DCM")
     parser.add_argument('--saved_model_dir', type=str, default="/opt/ml/checkpoint/") 
-    parser.add_argument('--exp_name', type=str, default='exp1') 
-    parser.add_argument('--file_name', type=str, default='output') 
+    parser.add_argument('--exp_name', type=str, default='exp1_hrnet/')
+    parser.add_argument('--file_name', type=str, default='epoch024')
 
     args = parser.parse_args()
 
