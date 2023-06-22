@@ -11,6 +11,17 @@ def create_criterion(criterion_name, **kwargs):
         return RuntimeError('Unknown loss (%s)' % criterion_name) 
     return criterion  
 
+def IOU_loss(inputs, targets, smooth=1) : 
+    inputs = F.sigmoid(inputs)      
+    inputs = inputs.view(-1)
+    targets = targets.view(-1)
+    intersection = (inputs * targets).sum()
+    total = (inputs + targets).sum()
+    union = total - intersection 
+    IoU = (intersection + smooth)/(union + smooth)
+    return 1 - IoU 
+
+
 def dice_loss(pred, target, smooth = 1.):
     pred = pred.contiguous()
     target = target.contiguous()   
@@ -19,7 +30,7 @@ def dice_loss(pred, target, smooth = 1.):
     return loss.mean() 
 
 
-class CombinedLoss(): 
+class CombinedLoss1(): 
     '''
         Binart Cross Entropy Loss + Dice Loss 
     '''
@@ -39,7 +50,27 @@ class CombinedLoss():
         return loss 
     
 
+class CombinedLoss2(): 
+    
+    def __call__(self, pred, target): 
+        
+        # Binary Cross Entropy Loss 
+        bce = F.binary_cross_entropy_with_logits(pred, target) 
+        
+        pred = F.sigmoid(pred)
+        # Dice Loss
+        dice = dice_loss(pred, target) 
+        
+        # IOU Loss 
+        iou = IOU_loss(pred, target)
+        
+        loss = bce * 0.4 + dice * 0.4 + iou * 0.2
+        
+        return loss
+
+
 _criterion_entrypoints = {
     'BCEWithLogitsLoss': nn.BCEWithLogitsLoss,
-    'CustomCombinedLoss': CombinedLoss,
+    'CustomCombinedLoss': CombinedLoss1, 
+    'CustomCombinedLoss1': CombinedLoss2,
 }
