@@ -138,12 +138,13 @@ def train(IMAGE_ROOT, LABEL_ROOT, SAVED_MODEL, args):
     
     # Get agmentation 
     tf = create_transforms(args.augmentation)
-    # preprocessing 
-    val_tf = A.Compose([A.Resize(512, 512)])
+
     
     # Make dataset 
     train_dataset = XRayDataset(IMAGE_ROOT, LABEL_ROOT, args.fold_num, is_train=True, transforms=tf)
-    valid_dataset = XRayDataset(IMAGE_ROOT, LABEL_ROOT, args.fold_num, is_train=False, transforms=val_tf)
+    valid_dataset = XRayDataset(IMAGE_ROOT, LABEL_ROOT, args.fold_num, is_train=False)
+    # valid_dataset = XRayDataset(IMAGE_ROOT, LABEL_ROOT, args.fold_num, is_train='preprocess')
+    
     
     # Load Data 
     train_loader = DataLoader(
