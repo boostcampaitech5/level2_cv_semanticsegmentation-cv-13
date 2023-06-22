@@ -109,7 +109,7 @@ def dice_coef(y_true, y_pred):
     return (2. * intersection + eps) / (torch.sum(y_true_f, -1) + torch.sum(y_pred_f, -1) + eps)
 
 
-def get_best_model_idx(model_paths, data_loader, append_dice:list=None):
+def get_best_model_idx(model_paths, data_loader=None, append_dice:list=None):
     dices_per_model = [] 
     for model_path in model_paths:
         model = torch.load(model_path)
@@ -117,23 +117,24 @@ def get_best_model_idx(model_paths, data_loader, append_dice:list=None):
         model.eval()
         
         dices = [] 
-        with torch.no_grad(): 
-        
-            for i, (images, masks) in tqdm(enumerate(data_loader), total=len(data_loader)):
-                images, masks = torch.from_numpy(images).cuda(), torch.from_numpy(masks).cuda()
+        if data_loader is not None:
+            with torch.no_grad(): 
+            
+                for i, (images, masks) in tqdm(enumerate(data_loader), total=len(data_loader)):
+                    images, masks = torch.from_numpy(images).cuda(), torch.from_numpy(masks).cuda()
 
-                pred = model(images)
-                
-                pred = torch.sigmoid(pred)
-                pred = (pred > 0.5).detach().cpu() 
-                masks = masks.detach().cpu() 
-                
-                dice = dice_coef(masks, pred)
-                dices.append(dice)
-                
-        dices = torch.cat(dices, 0)
-        dices_per_class = torch.mean(dices, 0)
-        dices_per_model.append(dices_per_class.numpy())  
+                    pred = model(images)
+                    
+                    pred = torch.sigmoid(pred)
+                    pred = (pred > 0.5).detach().cpu() 
+                    masks = masks.detach().cpu() 
+                    
+                    dice = dice_coef(masks, pred)
+                    dices.append(dice)
+                    
+            dices = torch.cat(dices, 0)
+            dices_per_class = torch.mean(dices, 0)
+            dices_per_model.append(dices_per_class.numpy())  
     
     if append_dice is not None: 
         for dices in append_dice: 

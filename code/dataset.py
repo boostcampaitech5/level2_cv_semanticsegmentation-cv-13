@@ -8,6 +8,7 @@ import json
 import numpy as np 
 
 from sklearn.model_selection import GroupKFold  
+import albumentations as A 
 
 
 class XRayDataset(Dataset): 
@@ -87,7 +88,14 @@ class XRayDataset(Dataset):
         self.filenames = filenames
         self.labelnames = labelnames
         self.is_train = is_train
-        self.transforms = transforms 
+        if is_train == True:
+            self.transforms = transforms 
+        elif is_train == 'preprocess':
+            transforms = A.Compose([A.Resize(1024, 1024), A.CLAHE(clip_limit=4.0, tile_grid_size=(8, 8), always_apply=True, p=1)])
+            self.transforms = transforms
+        else: 
+            transforms = A.Compose([A.Resize(1024, 1024)])
+            self.transforms = transforms 
     
     def __len__(self):
         return len(self.filenames)

@@ -138,6 +138,7 @@ def train(IMAGE_ROOT, LABEL_ROOT, SAVED_MODEL, args):
     
     # Get agmentation 
     tf = create_transforms(args.augmentation)
+    # preprocessing 
     val_tf = A.Compose([A.Resize(512, 512)])
     
     # Make dataset 
