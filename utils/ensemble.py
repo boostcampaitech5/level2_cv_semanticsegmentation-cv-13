@@ -167,8 +167,9 @@ def get_best_model_idx(model_paths, config_path, data_loader, append_dice:list=N
     for i, dices in enumerate(dices_per_model): 
         print(f'model {i}: ', list(dices))
         
-    best_model_idx_per_class = np.argmax(np.array(dices_per_model), 0)
-            
+    # best_model_idx_per_class = np.argmax(np.array(dices_per_model), 0)
+    best_model_idx_per_class = np.array(dices_per_model)
+    
     return best_model_idx_per_class  
 
 
