@@ -150,6 +150,7 @@ def get_best_model_idx(model_paths, data_loader=None, append_dice:list=None):
 
 def get_weighted_ensemble_mask(output_paths, start_idx, end_idx, best_model_idx_per_class, weight, thr):  
     
+    base = len(output_paths) - 1 + weight
     total_masks = None 
     for idx, output_path in enumerate(output_paths):   
         rle_df = pd.read_csv(output_path) 
@@ -173,6 +174,8 @@ def get_weighted_ensemble_mask(output_paths, start_idx, end_idx, best_model_idx_
             total_masks = masks
         else: 
             total_masks += masks 
+            
+    total_masks = total_masks / base 
 
     total_masks[total_masks < thr] = 0  
     total_masks[total_masks >= thr] = 1 
