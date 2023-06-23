@@ -183,7 +183,7 @@ def get_weighted_ensemble_mask(output_paths, start_idx, end_idx, best_model_idx_
     return total_masks 
 
 
-def get_weighed_ensemble_rles(output_paths, best_model_idx_per_class, weight, thr):  
+def get_weighted_ensemble_rles(output_paths, best_model_idx_per_class, weight, thr):  
     step = 8700 // 300 
     
     rles = [] 
@@ -200,10 +200,10 @@ def get_weighed_ensemble_rles(output_paths, best_model_idx_per_class, weight, th
     return rles 
 
 
-def get_weighed_ensemble_result(output_paths, save_path, best_model_idx_per_class, weight, thr): 
+def get_weighted_ensemble_result(output_paths, save_path, best_model_idx_per_class, weight, thr): 
     rles_df = pd.read_csv(output_paths[0])   
     
-    rles = get_weighed_ensemble_rles(output_paths, best_model_idx_per_class, weight, thr)
+    rles = get_weighted_ensemble_rles(output_paths, best_model_idx_per_class, weight, thr)
     
     submission = rles_df.copy() 
     submission['rle'] = rles 
